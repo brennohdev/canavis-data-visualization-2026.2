@@ -1,0 +1,136 @@
+cod_local,local,cod_variavel,variavel,cod_periodo,periodo,valor
+11,Rondônia,109,Área plantada,2023,2023,632
+11,Rondônia,216,Área colhida,2023,2023,618
+11,Rondônia,214,Quantidade produzida,2023,2023,21173
+11,Rondônia,112,Rendimento médio da produção,2023,2023,34261
+11,Rondônia,215,Valor da produção,2023,2023,13259
+12,Acre,109,Área plantada,2023,2023,465
+12,Acre,216,Área colhida,2023,2023,436
+12,Acre,214,Quantidade produzida,2023,2023,11457
+12,Acre,112,Rendimento médio da produção,2023,2023,26278
+12,Acre,215,Valor da produção,2023,2023,2558
+13,Amazonas,109,Área plantada,2023,2023,4732
+13,Amazonas,216,Área colhida,2023,2023,4729
+13,Amazonas,214,Quantidade produzida,2023,2023,357257
+13,Amazonas,112,Rendimento médio da produção,2023,2023,75546
+13,Amazonas,215,Valor da produção,2023,2023,70306
+14,Roraima,109,Área plantada,2023,2023,185
+14,Roraima,216,Área colhida,2023,2023,185
+14,Roraima,214,Quantidade produzida,2023,2023,3035
+14,Roraima,112,Rendimento médio da produção,2023,2023,16405
+14,Roraima,215,Valor da produção,2023,2023,2768
+15,Pará,109,Área plantada,2023,2023,17476
+15,Pará,216,Área colhida,2023,2023,17473
+15,Pará,214,Quantidade produzida,2023,2023,1209026
+15,Pará,112,Rendimento médio da produção,2023,2023,69194
+15,Pará,215,Valor da produção,2023,2023,150024
+16,Amapá,109,Área plantada,2023,2023,236
+16,Amapá,216,Área colhida,2023,2023,223
+16,Amapá,214,Quantidade produzida,2023,2023,5315
+16,Amapá,112,Rendimento médio da produção,2023,2023,23834
+16,Amapá,215,Valor da produção,2023,2023,2758
+17,Tocantins,109,Área plantada,2023,2023,36645
+17,Tocantins,216,Área colhida,2023,2023,36638
+17,Tocantins,214,Quantidade produzida,2023,2023,3072997
+17,Tocantins,112,Rendimento médio da produção,2023,2023,83875
+17,Tocantins,215,Valor da produção,2023,2023,415996
+21,Maranhão,109,Área plantada,2023,2023,45096
+21,Maranhão,216,Área colhida,2023,2023,45096
+21,Maranhão,214,Quantidade produzida,2023,2023,2741432
+21,Maranhão,112,Rendimento médio da produção,2023,2023,60791
+21,Maranhão,215,Valor da produção,2023,2023,488211
+22,Piauí,109,Área plantada,2023,2023,17951
+22,Piauí,216,Área colhida,2023,2023,17951
+22,Piauí,214,Quantidade produzida,2023,2023,1183019
+22,Piauí,112,Rendimento médio da produção,2023,2023,65903
+22,Piauí,215,Valor da produção,2023,2023,218467
+23,Ceará,109,Área plantada,2023,2023,8725
+23,Ceará,216,Área colhida,2023,2023,8725
+23,Ceará,214,Quantidade produzida,2023,2023,556369
+23,Ceará,112,Rendimento médio da produção,2023,2023,63767
+23,Ceará,215,Valor da produção,2023,2023,115913
+24,Rio Grande do Norte,109,Área plantada,2023,2023,65765
+24,Rio Grande do Norte,216,Área colhida,2023,2023,65495
+24,Rio Grande do Norte,214,Quantidade produzida,2023,2023,3827272
+24,Rio Grande do Norte,112,Rendimento médio da produção,2023,2023,58436
+24,Rio Grande do Norte,215,Valor da produção,2023,2023,720429
+25,Paraíba,109,Área plantada,2023,2023,109237
+25,Paraíba,216,Área colhida,2023,2023,109237
+25,Paraíba,214,Quantidade produzida,2023,2023,7066802
+25,Paraíba,112,Rendimento médio da produção,2023,2023,64692
+25,Paraíba,215,Valor da produção,2023,2023,1143029
+26,Pernambuco,109,Área plantada,2023,2023,260822
+26,Pernambuco,216,Área colhida,2023,2023,260601
+26,Pernambuco,214,Quantidade produzida,2023,2023,16089574
+26,Pernambuco,112,Rendimento médio da produção,2023,2023,61740
+26,Pernambuco,215,Valor da produção,2023,2023,2649098
+27,Alagoas,109,Área plantada,2023,2023,290003
+27,Alagoas,216,Área colhida,2023,2023,290003
+27,Alagoas,214,Quantidade produzida,2023,2023,18982924
+27,Alagoas,112,Rendimento médio da produção,2023,2023,65458
+27,Alagoas,215,Valor da produção,2023,2023,2253674
+28,Sergipe,109,Área plantada,2023,2023,44947
+28,Sergipe,216,Área colhida,2023,2023,43077
+28,Sergipe,214,Quantidade produzida,2023,2023,2476045
+28,Sergipe,112,Rendimento médio da produção,2023,2023,57480
+28,Sergipe,215,Valor da produção,2023,2023,253060
+29,Bahia,109,Área plantada,2023,2023,77268
+29,Bahia,216,Área colhida,2023,2023,77268
+29,Bahia,214,Quantidade produzida,2023,2023,5651267
+29,Bahia,112,Rendimento médio da produção,2023,2023,73139
+29,Bahia,215,Valor da produção,2023,2023,776758
+31,Minas Gerais,109,Área plantada,2023,2023,1058212
+31,Minas Gerais,216,Área colhida,2023,2023,1058212
+31,Minas Gerais,214,Quantidade produzida,2023,2023,82544375
+31,Minas Gerais,112,Rendimento médio da produção,2023,2023,78004
+31,Minas Gerais,215,Valor da produção,2023,2023,11462008
+32,Espírito Santo,109,Área plantada,2023,2023,53123
+32,Espírito Santo,216,Área colhida,2023,2023,53123
+32,Espírito Santo,214,Quantidade produzida,2023,2023,3094072
+32,Espírito Santo,112,Rendimento médio da produção,2023,2023,58244
+32,Espírito Santo,215,Valor da produção,2023,2023,243033
+33,Rio de Janeiro,109,Área plantada,2023,2023,52667
+33,Rio de Janeiro,216,Área colhida,2023,2023,52667
+33,Rio de Janeiro,214,Quantidade produzida,2023,2023,2382962
+33,Rio de Janeiro,112,Rendimento médio da produção,2023,2023,45246
+33,Rio de Janeiro,215,Valor da produção,2023,2023,277579
+35,São Paulo,109,Área plantada,2023,2023,5496459
+35,São Paulo,216,Área colhida,2023,2023,5484192
+35,São Paulo,214,Quantidade produzida,2023,2023,439098082
+35,São Paulo,112,Rendimento médio da produção,2023,2023,80066
+35,São Paulo,215,Valor da produção,2023,2023,56729446
+41,Paraná,109,Área plantada,2023,2023,519906
+41,Paraná,216,Área colhida,2023,2023,519906
+41,Paraná,214,Quantidade produzida,2023,2023,38586024
+41,Paraná,112,Rendimento médio da produção,2023,2023,74217
+41,Paraná,215,Valor da produção,2023,2023,4672937
+42,Santa Catarina,109,Área plantada,2023,2023,3931
+42,Santa Catarina,216,Área colhida,2023,2023,3926
+42,Santa Catarina,214,Quantidade produzida,2023,2023,203695
+42,Santa Catarina,112,Rendimento médio da produção,2023,2023,51884
+42,Santa Catarina,215,Valor da produção,2023,2023,81718
+43,Rio Grande do Sul,109,Área plantada,2023,2023,12099
+43,Rio Grande do Sul,216,Área colhida,2023,2023,12049
+43,Rio Grande do Sul,214,Quantidade produzida,2023,2023,426956
+43,Rio Grande do Sul,112,Rendimento médio da produção,2023,2023,35435
+43,Rio Grande do Sul,215,Valor da produção,2023,2023,103559
+50,Mato Grosso do Sul,109,Área plantada,2023,2023,660722
+50,Mato Grosso do Sul,216,Área colhida,2023,2023,660722
+50,Mato Grosso do Sul,214,Quantidade produzida,2023,2023,51789876
+50,Mato Grosso do Sul,112,Rendimento médio da produção,2023,2023,78384
+50,Mato Grosso do Sul,215,Valor da produção,2023,2023,6372629
+51,Mato Grosso,109,Área plantada,2023,2023,239366
+51,Mato Grosso,216,Área colhida,2023,2023,238056
+51,Mato Grosso,214,Quantidade produzida,2023,2023,19060217
+51,Mato Grosso,112,Rendimento médio da produção,2023,2023,80066
+51,Mato Grosso,215,Valor da produção,2023,2023,2073107
+52,Goiás,109,Área plantada,2023,2023,978329
+52,Goiás,216,Área colhida,2023,2023,978329
+52,Goiás,214,Quantidade produzida,2023,2023,81599588
+52,Goiás,112,Rendimento médio da produção,2023,2023,83407
+52,Goiás,215,Valor da produção,2023,2023,10584857
+53,Distrito Federal,109,Área plantada,2023,2023,205
+53,Distrito Federal,216,Área colhida,2023,2023,205
+53,Distrito Federal,214,Quantidade produzida,2023,2023,17425
+53,Distrito Federal,112,Rendimento médio da produção,2023,2023,85000
+53,Distrito Federal,215,Valor da produção,2023,2023,1133

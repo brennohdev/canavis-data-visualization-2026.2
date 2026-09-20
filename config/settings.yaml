@@ -1,0 +1,16 @@
+http:
+  timeout_seconds: 180
+  user_agent: "canavis/0.1 (projeto academico UFPB - Visualizacao de Dados)"
+
+paths:
+  raw: "data/raw"
+  interim: "data/interim"
+  processed: "data/processed"
+
+storage:
+  format: "parquet"
+  compression: "zstd"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"

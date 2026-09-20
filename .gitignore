@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Dados do pipeline: versionamos os parquet (compactos), ignoramos CSV volumoso
+data/**/*.csv
+!data/samples/*.csv
+
+# Artefatos de compilação LaTeX
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Jupyter
+.ipynb_checkpoints/

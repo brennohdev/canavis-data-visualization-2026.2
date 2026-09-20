@@ -1,0 +1,48 @@
+ibge_pam:
+  name: "IBGE — Produção Agrícola Municipal (Tabela 1612)"
+  adapter: ibge
+  base_url: "https://apisidra.ibge.gov.br/values"
+  metadata_url: "https://servicodados.ibge.gov.br/api/v3/agregados/1612/metadados"
+  table: "1612"
+  product_classifier: "c81"
+  product_code: "2696"
+  variables:
+    area_plantada: "109"
+    area_colhida: "216"
+    quantidade_produzida: "214"
+    rendimento_medio: "112"
+    valor_producao: "215"
+  extractions:
+    municipios_pb:
+      level: "6"
+      localities: "in n3 25"
+      periods: "2023"
+    ufs_brasil:
+      level: "3"
+      localities: "all"
+      periods: "2023"
+    serie_pb:
+      level: "3"
+      localities: "25"
+      periods: "2003-2023"
+
+conab_cana:
+  name: "CONAB — Série Histórica da Cana"
+  adapter: conab
+  url: "https://portaldeinformacoes.conab.gov.br/downloads/arquivos/SerieHistoricaCana.txt"
+  separator: ";"
+  encoding: "latin-1"
+
+anp_vendas_etanol:
+  name: "ANP — Vendas anuais de etanol hidratado por município"
+  adapter: anp
+  url: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/etanol-hidratado/vendas-anuais-de-etanol-hidratado-por-municipio.csv"
+  separator: ";"
+  encoding: "utf-8-sig"
+
+anp_producao_etanol:
+  name: "ANP — Produção de etanol anidro e hidratado por UF"
+  adapter: anp
+  url: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-producao-de-biocombustiveis/producao-etanol-anidro-hidratado-m3-2012-2026.csv"
+  separator: ";"
+  encoding: "utf-8-sig"
