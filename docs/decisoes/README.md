@@ -12,3 +12,4 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0004](0004-granularidade-e-janela-temporal.md) | Granularidade por tipo de análise e janela temporal para tendência | Aceita |
 | [0005](0005-vereditos-de-indicadores.md) | Vereditos de validação dos indicadores (mantém/ajusta/descarta) | Aceita |
 | [0006](0006-tiers-de-comparacao-por-clusterizacao.md) | Tiers de comparação por clusterização (agrupar por escala, comparar por eficiência) | Proposta |
+| [0007](0007-chuva-para-resiliencia-climatica.md) | Ancorar resiliência climática em dados de chuva (3 fontes testadas) | Rejeitada |
