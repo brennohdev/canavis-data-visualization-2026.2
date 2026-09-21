@@ -326,11 +326,11 @@ etapas seguintes.
 \endfoot
 1 & Como está distribuída a produção de cana entre as regiões do país? & Quantidade produzida; participação regional (\%) & Composição / posição no espaço & Mapa coroplético e barras\\
 \addlinespace
-2 & Como a produtividade da Paraíba evoluiu ao longo das safras? & Rendimento (t/ha) & Evolução & Linha temporal\\
+2 & Como a produtividade da região evoluiu ao longo das safras? & Produtividade (t/ha) & Evolução & Linha temporal\\
 \addlinespace
-3 & Como a produtividade da região se compara à média nacional e à de outros estados? & Desvio de produtividade vs.\ referência (\%) & Desvio em relação a referência & Barras divergentes\\
+3 & Como a produtividade da região se compara à de outras, na mesma escala? & Produtividade (t/ha) frente à referência regional & Desvio em relação a referência & Barras divergentes\\
 \addlinespace
-4 & Quais municípios da Paraíba puxam ou seguram a produtividade estadual? & Rendimento municipal (t/ha); ranking & Ranqueamento & Barras ordenadas\\
+4 & Quais microrregiões vêm ganhando ou perdendo produtividade de forma consistente? & Tendência de produtividade (t/ha por ano) & Evolução / ranqueamento & Barras ordenadas\\
 \addlinespace
 5 & Como se divide o destino da cana entre açúcar e etanol na região? & \textit{Mix} açúcar/etanol; ATR (kg/t) & Composição & Barras empilhadas\\
 \end{longtable}
@@ -347,8 +347,10 @@ descoberta (os \textit{scripts} de coleta e as amostras acompanham a entrega).
   \item \textbf{IBGE — Produção Agrícola Municipal (Tabela 1612 do SIDRA).} Fonte principal.
   Traz área plantada, área colhida, quantidade produzida, rendimento médio e valor da produção
   da cana-de-açúcar (produto 2696). Recorte temporal anual, de 1974 a 2025; recorte geográfico
-  do Brasil ao município. Coletada via API pública, sem cadastro. Volume: a consulta municipal
-  da Paraíba retornou 223 municípios; a consulta nacional cobre as 27 unidades da federação.
+  do Brasil ao município. Coletada via API pública, sem cadastro. Volume: a consulta abrange os
+  223 municípios da Paraíba, embora apenas cerca de 120 apresentem produção de cana registrada
+  em algum ano (os demais vêm suprimidos, ver limitações), e a consulta nacional cobre as 27
+  unidades da federação.
   \item \textbf{CONAB — Série Histórica da Cana.} Camada industrial. Traz produção de açúcar,
   de etanol (anidro, hidratado e total) e o ATR por unidade da federação e safra, de 2005/06
   em diante. Arquivo aberto em texto; 470 registros, dos quais 22 safras da Paraíba.
@@ -395,8 +397,10 @@ Código do município (IBGE) & Identificador do município, chave de junção & 
 \textbf{Três limitações conhecidas da base:}
 \begin{enumerate}
   \item \textbf{Supressão em municípios pequenos.} Na PAM, municípios de produção muito baixa
-  retornam valor ausente (``-''), o que impede calcular produtividade nesses casos e exige
-  tratamento explícito antes de qualquer ranking.
+  retornam valor ausente (``-''). Uma verificação preliminar mostrou que cerca de 62\% dos
+  registros municipais-ano de rendimento estão suprimidos, contra 36\% no nível de microrregião
+  e nenhum no de UF. Por isso a análise de série de longo prazo trabalha na microrregião, e o
+  município fica reservado ao retrato de um único ano.
   \item \textbf{Calendários diferentes.} O IBGE trabalha em ano civil e a CONAB em safra (ano
   agrícola). Cruzar as duas exige uma regra declarada de alinhamento temporal.
   \item \textbf{Granularidade e defasagem.} A camada industrial (açúcar, etanol, ATR) só
@@ -410,24 +414,26 @@ Código do município (IBGE) & Identificador do município, chave de junção & 
 \section{Indicadores derivados}
 
 Os indicadores abaixo são calculados a partir das variáveis brutas, não lidos prontos. A
-fórmula do primeiro foi validada na fase de descoberta: recompor o rendimento a partir de
-quantidade e área colhida reproduz exatamente o rendimento publicado pelo IBGE.
+fórmula da produtividade foi validada na fase de descoberta: recompor o rendimento a partir de
+quantidade e área colhida reproduz exatamente o rendimento publicado pelo IBGE. Uma ressalva de
+método já confirmada: a produtividade não é aditiva, logo é calculada como soma de quantidade
+sobre soma de área, nunca como média de rendimentos.
 
 \begin{enumerate}
   \item \textbf{Produtividade da cana.}
   \\ Fórmula: quantidade produzida (t) $\div$ área colhida (ha).
   \\ Unidade: t/ha. \quad Sentido: maior é melhor.
-  \\ Referência: média estadual, média nacional e safra anterior.
+  \\ Referência: média da microrregião, média estadual, média nacional e safra anterior.
 
   \item \textbf{Participação regional na produção.}
   \\ Fórmula: produção da unidade $\div$ produção do agregado (estado ou Brasil) $\times$ 100.
   \\ Unidade: \%. \quad Sentido: contextual (mede peso e concentração).
   \\ Referência: total estadual ou nacional.
 
-  \item \textbf{Desvio de produtividade em relação à referência.}
-  \\ Fórmula: (produtividade da unidade $-$ média do grupo) $\div$ média do grupo $\times$ 100.
-  \\ Unidade: \%. \quad Sentido: positivo é melhor.
-  \\ Referência: média da microrregião, do estado ou do país.
+  \item \textbf{Tendência de produtividade.}
+  \\ Fórmula: inclinação da reta ajustada à série de produtividade, em janela recente.
+  \\ Unidade: t/ha por ano. \quad Sentido: positivo é melhor.
+  \\ Referência: zero (estável) e a tendência das demais regiões da mesma escala.
 
   \item \textbf{Mix açúcar/etanol.}
   \\ Fórmula: relação entre etanol (mil L) e açúcar (mil t) produzidos na safra, lida junto do
@@ -435,6 +441,10 @@ quantidade e área colhida reproduz exatamente o rendimento publicado pelo IBGE.
   \\ Unidade: proporção. \quad Sentido: contextual (decisão estratégica).
   \\ Referência: média nacional e safra anterior.
 \end{enumerate}
+
+A comparação de produtividade contra uma referência (o desvio percentual frente à média do
+grupo) permanece disponível como forma de leitura, não como indicador autônomo, por ser uma
+transformação direta da própria produtividade.
 
 % ==================================================================
 % (j) MENSAGEM CENTRAL E AÇÕES ESPERADAS
@@ -548,12 +558,19 @@ olhar a evolução de uma safra específica. Um relatório fixo responderia a um
 envelheceria; o produto interativo deixa a persona escolher o recorte que a decisão do momento
 exige, com o dado sempre atualizado na fonte.
 
-\textbf{O que ainda está incerto e será decidido na Etapa 2?} Duas escolhas de fundo. A
-primeira é a regra de alinhamento entre ano civil (IBGE) e safra (CONAB), que precisa ser
-testada com os dados reais antes de virar medida. A segunda é o nível de granularidade que
-sustenta a comparação sem cair na armadilha da supressão municipal: pode ser que a
-microrregião seja o recorte mais honesto para rankings, deixando o município para consulta
-individual.
+\textbf{Uma validação preliminar já foi feita.} Embora esta etapa trate de enquadramento, o
+grupo adiantou uma checagem estatística dos indicadores sobre os dados reais, registrada no
+repositório do projeto (notebooks de análise e registros de decisão). Dessa checagem vieram
+três ajustes já incorporados acima: a produtividade é tratada como medida não aditiva; o desvio
+frente à referência deixou de ser indicador autônomo por ser transformação direta da
+produtividade; e a análise de longo prazo foi fixada no nível de microrregião, dada a
+supressão municipal. Um indicador de resiliência climática foi considerado, mas o cruzamento
+com dados públicos de chuva não sustentou relação estatística na faixa canavieira, e a
+investigação ficou documentada para retomada futura.
+
+\textbf{O que ainda está incerto e será decidido na Etapa 2?} A regra de alinhamento entre ano
+civil (IBGE) e safra (CONAB), que precisa ser testada antes de virar medida, e a forma final de
+comparar regiões de escalas muito diferentes sem que o ranking vire ranking de porte.
 
 \textbf{O que faríamos diferente com o dobro do tempo?} Investiríamos em incorporar o Comex
 Stat, hoje deixado de fora porque sua API está protegida por verificação anti-robô, e o
