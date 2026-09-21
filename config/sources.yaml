@@ -13,17 +13,17 @@ ibge_pam:
     rendimento_medio: "112"
     valor_producao: "215"
   extractions:
-    municipios_pb:
+    serie_municipios_pb:
       level: "6"
       localities: "in n3 25"
-      periods: "2023"
-    ufs_brasil:
+      periods: "2003-2023"
+    serie_microrregioes_pb:
+      level: "9"
+      localities: "in n3 25"
+      periods: "2003-2023"
+    serie_ufs_brasil:
       level: "3"
       localities: "all"
-      periods: "2023"
-    serie_pb:
-      level: "3"
-      localities: "25"
       periods: "2003-2023"
 
 conab_cana:
