@@ -11,3 +11,4 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0003](0003-clean-architecture.md) | Separar domínio, fontes e pipeline com regra de dependência | Aceita |
 | [0004](0004-granularidade-e-janela-temporal.md) | Granularidade por tipo de análise e janela temporal para tendência | Aceita |
 | [0005](0005-vereditos-de-indicadores.md) | Vereditos de validação dos indicadores (mantém/ajusta/descarta) | Aceita |
+| [0006](0006-tiers-de-comparacao-por-clusterizacao.md) | Tiers de comparação por clusterização (agrupar por escala, comparar por eficiência) | Proposta |
