@@ -35,6 +35,10 @@
 % ------------------------------------------------------------------
 % Cores e apoio visual
 % ------------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{../../wireframes/}}
+
 \usepackage{xcolor}
 \definecolor{azulufpb}{RGB}{31,73,125}
 \definecolor{cinzaclaro}{RGB}{242,242,242}
@@ -468,7 +472,7 @@ A partir dessa leitura, a persona deve poder:
 % ==================================================================
 % (k) ESBOÇO DE BAIXA FIDELIDADE
 % ==================================================================
-\section{Esboço de baixa fidelidade}
+\section{Esboço de baixa fidelidade}\label{sec:esboco}
 
 Foram produzidos três esboços da tela principal antes de escolher um para detalhar. Os três
 partem da mesma pergunta de decisão, mas organizam a resposta de formas diferentes.
@@ -483,20 +487,45 @@ partem da mesma pergunta de decisão, mas organizam a resposta de formas diferen
 \end{itemize}
 
 \textbf{Escolha: esboço A.} Ele responde primeiro à pergunta de posicionamento (``onde minha
-região está''), que é a mais geral, e deixa evolução e ranking como aprofundamento. O esboço
-detalhado da tela principal e de ao menos uma tela secundária é entregue à parte, feito no
-Figma, sem cores definitivas, sem dados reais e sem logotipos, indicando o que fica acima da
-dobra, onde ficam os filtros, onde fica a mensagem principal, o que é clicável e o que é
-apenas informativo.
+região está''), que é a mais geral, e deixa evolução e ranking como aprofundamento.
 
-\begin{center}
-\fbox{\begin{minipage}{0.92\textwidth}
-\centering\vspace{1.2cm}
-\textit{[Espaço reservado para os três esboços de baixa fidelidade e o esboço detalhado.
-Arquivos entregues em imagem/PDF junto ao pacote da Etapa~1.]}
-\vspace{1.2cm}
-\end{minipage}}
-\end{center}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{esbocos-sem-fundo.png}
+  \caption{Três esboços de baixa fidelidade da tela principal. Da esquerda para a direita:
+  esboço A (mapa em primeiro plano), esboço B (comparação em primeiro plano) e esboço C
+  (evolução em primeiro plano). Sem cores definitivas, dados reais ou logotipos.}
+  \label{fig:esbocos}
+\end{figure}
+
+A partir do esboço A escolhido, foi detalhado o fluxo completo de navegação, feito no Figma,
+sem cores definitivas, sem dados reais e sem logotipos, indicando o que fica acima da dobra,
+onde ficam os filtros, onde fica a mensagem principal, o que é clicável e o que é apenas
+informativo. As três telas do fluxo são apresentadas a seguir.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{tela-inicial.png}
+  \caption{Tela inicial — panorama nacional. Situa a região no mapa da produção do país; é o
+  ponto de entrada do produto.}
+  \label{fig:tela-inicial}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{tela-estado.png}
+  \caption{Segunda tela — detalhe do estado. Mostra a evolução e o \textit{ranking} de
+  municípios da UF selecionada no panorama nacional.}
+  \label{fig:tela-estado}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{tela-municipio.png}
+  \caption{Terceira tela — detalhe do município. Aprofunda a série histórica e o \textit{mix}
+  açúcar/etanol de um município específico.}
+  \label{fig:tela-municipio}
+\end{figure}
 
 % ==================================================================
 % (l) MAPA DE NAVEGAÇÃO
@@ -522,7 +551,13 @@ Detalhe do estado & Mostrar evolução e ranking de municípios da UF & Panorama
 Detalhe do município & Aprofundar a série e o mix de um município & Detalhe do estado & Panorama nacional & Botão de voltar / seleção de nova UF\\
 \end{longtable}
 
-A mudança de rota entre essas telas é o compromisso que será cobrado nas Etapas 2 e 3.
+As três telas do mapa acima correspondem, na ordem, aos esboços detalhados da
+Seção~\ref{sec:esboco}: o \textbf{panorama nacional} é a tela inicial
+(Figura~\ref{fig:tela-inicial}); o \textbf{detalhe do estado} é a segunda tela
+(Figura~\ref{fig:tela-estado}), alcançada ao clicar em um estado no mapa; e o
+\textbf{detalhe do município} é a terceira tela (Figura~\ref{fig:tela-municipio}), alcançada
+ao clicar em um município do \textit{ranking}. A mudança de rota entre essas telas é o
+compromisso que será cobrado nas Etapas 2 e 3.
 
 % ==================================================================
 % (m) RISCOS ÉTICOS E DE INTERPRETAÇÃO
