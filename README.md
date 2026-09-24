@@ -1,75 +1,75 @@
-# canavis — Benchmarking regional da cana-de-açúcar na Paraíba
+# canavis — Regional benchmarking of sugarcane in Paraíba
 
-Projeto da disciplina Visualização de Dados (PSAE00218) — UFPB, Departamento de Economia.
-Produto de dados que situa a produção de cana da Paraíba frente a outras regiões do país,
-usando fontes públicas, para apoiar decisões de plantio, área e relação com fornecedores.
+Project for the Data Visualization course (PSAE00218) — UFPB, Department of Economics.
+A data product that positions Paraíba's sugarcane production against other regions of the country,
+using public sources, to support decisions on planting, area, and relationships with suppliers.
 
-**Grupo:** Alex Tavares Cordeiro · Brenno Henrique Alves da Silva Costa · Gustavo Henrique Rocha Oliveira
+**Team:** Alex Tavares Cordeiro · Brenno Henrique Alves da Silva Costa · Gustavo Henrique Rocha Oliveira
 
-## Estrutura
+## Structure
 
 ```
-config/            Configuração externa (fontes, caminhos, logging) em YAML
-data/              Camadas de dados: raw (bronze), interim (silver), processed (gold)
-  samples/         Amostras coletadas na descoberta, versionadas como evidência
-docs/              Documentação e gestão de projeto
-  entrega-etapa1/  Documento da Etapa 1 (.tex e .pdf)
-  entrevista/      Roteiro e anotações da persona
-  decisoes/        Registros de decisão de arquitetura (ADR)
-notebooks/         Exploração (mapeamento de dados)
-src/canavis/       Pacote Python
-  domain/          Indicadores como funções puras (sem IO)
-  sources/         Adaptadores de fonte atrás de interface comum
-  pipeline/        Extract, transform e build entre as camadas
-tests/             Testes dos indicadores
+config/            External configuration (sources, paths, logging) in YAML
+data/              Data layers: raw (bronze), interim (silver), processed (gold)
+  samples/         Samples collected during discovery, versioned as evidence
+docs/              Documentation and project management
+  entrega-etapa1/  Stage 1 document (.tex and .pdf)
+  entrevista/      Persona interview script and notes
+  decisoes/        Architecture Decision Records (ADR)
+notebooks/         Exploration (data mapping)
+src/canavis/       Python package
+  domain/          Indicators as pure functions (no IO)
+  sources/         Source adapters behind a common interface
+  pipeline/        Extract, transform, and build across the layers
+tests/             Indicator tests
 ```
 
-A arquitetura segue a regra de dependência: `domain` não conhece `sources` nem `pipeline`.
-Trocar ou acrescentar uma fonte é registrar um adaptador, sem tocar no cálculo dos indicadores.
-O detalhamento está em [docs/decisoes](docs/decisoes/README.md).
+The architecture follows the dependency rule: `domain` knows nothing about `sources` or `pipeline`.
+Swapping or adding a source means registering an adapter, without touching the indicator computations.
+Details are in [docs/decisoes](docs/decisoes/README.md).
 
-## Fontes de dados
+## Data sources
 
-| Fonte | Papel | Granularidade | Situação |
-|-------|-------|---------------|----------|
-| IBGE PAM (Tabela 1612) | Base — produtividade | Município a Brasil, anual | Coletada |
-| CONAB Série da Cana | Base — açúcar, etanol, ATR | UF, safra | Coletada |
-| ANP (vendas e produção de etanol) | Contexto | Município e UF | Coletada |
-| Comex Stat | Ampliação futura | Município e UF | Fora (API atrás de Cloudflare) |
+| Source | Role | Granularity | Status |
+|--------|------|-------------|--------|
+| IBGE PAM (Table 1612) | Base — productivity | Municipality to Brazil, annual | Collected |
+| CONAB Sugarcane Series | Base — sugar, ethanol, TRS | State, harvest | Collected |
+| ANP (ethanol sales and production) | Context | Municipality and state | Collected |
+| Comex Stat | Future expansion | Municipality and state | Out (API behind Cloudflare) |
 
-## Como rodar
+## How to run
 
-O ambiente é isolado com [uv](https://docs.astral.sh/uv/).
+The environment is isolated with [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync                      # instala as dependências no .venv do projeto
-uv run canavis-pipeline      # executa extract -> transform -> build
+uv sync                      # installs dependencies into the project's .venv
+uv run canavis-pipeline      # runs extract -> transform -> build
 ```
 
-Estágios podem ser executados isoladamente:
+Stages can be run individually:
 
 ```bash
 uv run canavis-pipeline --stage extract
 uv run canavis-pipeline --stage transform --stage build
 ```
 
-Saídas por camada (em Parquet com compressão zstd, versionadas no repositório):
+Outputs per layer (in Parquet with zstd compression, versioned in the repository):
 
-- `data/raw/` — dado cru, uma cópia por fonte
-- `data/interim/` — dado limpo e tipado
-- `data/processed/produtividade_regional.parquet` — dataset pronto, com produtividade e desvio
+- `data/raw/` — raw data, one copy per source
+- `data/interim/` — cleaned and typed data
+- `data/processed/produtividade_regional.parquet` — ready dataset, with productivity and deviation
 
-O formato de armazenamento é configurável em `config/settings.yaml` (`storage.format`), caso
-alguma etapa precise de CSV.
+The storage format is configurable in `config/settings.yaml` (`storage.format`), in case
+some stage needs CSV.
 
-## Testes
+## Tests
 
 ```bash
 uv run --extra dev pytest
 ```
 
-## Roadmap por etapa
+## Roadmap by stage
 
-- **Etapa 1 — Descoberta (atual).** Persona, problema, fontes documentadas e camada de dados.
-- **Etapa 2 — Protótipo.** Relatório em Power BI sobre a camada `processed`.
-- **Etapa 3 — Aplicação.** Dash consumindo `canavis.domain` e `canavis.pipeline`.
+- **Stage 1 — Discovery (current).** Persona, problem, documented sources, and data layer.
+- **Stage 2 — Prototype.** Power BI report on the `processed` layer.
+- **Stage 3 — Application.** Dash consuming `canavis.domain` and `canavis.pipeline`.
