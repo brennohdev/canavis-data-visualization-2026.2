@@ -1,0 +1,37 @@
+{
+  "name": "CanaVis",
+  "dataColors": [
+    "#2F6B3C",
+    "#E08A1E",
+    "#7BA886",
+    "#3A6EA5",
+    "#6B7785"
+  ],
+  "background": "#F2F2F2",
+  "secondaryBackground": "#FFFFFF",
+  "foreground": "#1A1A1A",
+  "foregroundNeutralSecondary": "#50565E",
+  "tableAccent": "#2F6B3C",
+  "good": "#2F6B3C",
+  "neutral": "#6B7785",
+  "bad": "#E08A1E",
+  "maximum": "#2F6B3C",
+  "center": "#F2F2F2",
+  "minimum": "#E08A1E",
+  "null": "#6B7785",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "color": { "solid": { "color": "#D5D9DE" } } }],
+        "title": [
+          {
+            "fontColor": { "solid": { "color": "#1A1A1A" } },
+            "fontSize": 14,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ]
+      }
+    }
+  }
+}
