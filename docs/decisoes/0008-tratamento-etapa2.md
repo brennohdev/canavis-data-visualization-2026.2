@@ -3,6 +3,14 @@
 **Status:** Aceita
 **Evidência:** `notebooks/03_etapa2_tratamento.ipynb`
 
+> **Atualização de 29/10/2026 (camada gold):** o de-para nominal abaixo era
+> preliminar. A consulta ao [serviço oficial de localidades do IBGE](https://servicodados.ibge.gov.br/api/v1/localidades/estados/25/municipios)
+> mostrou relações múltiplas: Litoral Norte e Sapé cruzam duas regiões imediatas;
+> Brejo Paraibano cruza duas imediatas e duas intermediárias. O módulo
+> `domain/territorio.py` e a dimensão gold foram corrigidos para representar
+> essas relações sem atribuir uma região única indevida. O recorte consultado
+> está versionado em `data/reference/municipios_pb_ibge.parquet`.
+
 ## Contexto
 
 A Etapa 2 (protótipo em Power BI) começa resolvendo as pendências de dados do
@@ -88,8 +96,9 @@ intermediárias) só existe a partir de 2017, então **não** substitui a chave;
 de-para serve para *comparar* a leitura antiga com as divisões novas sem
 reprocessar a série.
 
-De-para das cinco microrregiões canavieiras (ADR 0007) → regiões geográficas
-(IBGE DRB 2017), ao **nível de nome**:
+De-para **preliminar da Etapa 2**, substituído pela atualização acima, das cinco
+microrregiões canavieiras (ADR 0007) → regiões geográficas (IBGE DRB 2017),
+ao **nível de nome**:
 
 | Microrregião (PAM) | Região imediata | Região intermediária |
 |--------------------|-----------------|----------------------|
@@ -99,12 +108,11 @@ De-para das cinco microrregiões canavieiras (ADR 0007) → regiões geográfica
 | João Pessoa - PB   | João Pessoa     | João Pessoa          |
 | Brejo Paraibano - PB | Guarabira     | João Pessoa          |
 
-O de-para mora em módulo importável `src/canavis/domain/territorio.py`
-(`MICRORREGIOES_CANAVIEIRAS`, `regiao_de`), consumido pelo notebook e pelos
-testes. Os pares são ao nível de nome e estão marcados como **pendentes de
-confirmação na fonte oficial** (flag `CONFIRMACAO_FONTE_OFICIAL_PENDENTE`):
-nenhum código oficial foi inventado — os campos `cod_imediata`/`cod_intermediaria`
-ficam `None` enquanto não verificados.
+O de-para atualizado mora em `src/canavis/domain/territorio.py`
+(`MICRORREGIOES_CANAVIEIRAS`, `regiao_de`). As listas retornam todos os códigos
+oficiais encontrados; os campos singulares `cod_imediata`/`cod_intermediaria`
+ficam `None` quando há mais de uma região possível. A flag
+`CONFIRMACAO_FONTE_OFICIAL_PENDENTE` passou a `False` para esse recorte.
 
 ## Consequências
 
@@ -116,7 +124,7 @@ ficam `None` enquanto não verificados.
   suprimido é exibido como "sem informação", nunca como zero (coerente com o ADR
   0004).
 - O recorte territorial fica auditável: a chave de série continua microrregião, e
-  a comparação com as divisões novas tem um de-para explícito — com os pares que
-  ainda precisam de confirmação oficial claramente sinalizados.
+  a comparação com as divisões novas usa o de-para oficial atualizado, que
+  preserva relações múltiplas quando não existe correspondência 1:1.
 - A defasagem de ~1 ano da PAM está registrada, evitando que o protótipo prometa
   atualidade que o dado não tem.

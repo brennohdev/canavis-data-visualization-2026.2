@@ -57,10 +57,12 @@ Outputs per layer (in Parquet with zstd compression, versioned in the repository
 
 - `data/raw/` — raw data, one copy per source
 - `data/interim/` — cleaned and typed data
-- `data/processed/produtividade_regional.parquet` — ready dataset, with productivity and deviation
+- `data/processed/fato_producao.parquet` — annual production fact table (quantity, harvested area, productivity)
+- `data/processed/dim_territorio.parquet`, `dim_calendario.parquet`, `dim_fonte.parquet` — star-model dimensions
 
-The storage format is configurable in `config/settings.yaml` (`storage.format`), in case
-some stage needs CSV.
+The storage format is configurable in `config/settings.yaml` (`storage.format`):
+`parquet` (default), `csv`, or `xlsx`. The gold table grain, relationships, missing-value
+rules, and Power BI guidance are in [docs/entrega-etapa2/camada-gold.md](docs/entrega-etapa2/camada-gold.md).
 
 ## Tests
 

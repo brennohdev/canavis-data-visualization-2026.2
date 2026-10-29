@@ -20,6 +20,8 @@ def write(frame: pd.DataFrame, directory: Path, name: str) -> Path:
         frame.to_parquet(destination, compression=storage.compression, index=False)
     elif storage.format == "csv":
         frame.to_csv(destination, index=False, encoding="utf-8")
+    elif storage.format == "xlsx":
+        frame.to_excel(destination, index=False, engine="openpyxl")
     else:
         raise ValueError(f"Formato de storage não suportado: {storage.format}")
     return destination
@@ -32,6 +34,8 @@ def read(directory: Path, name: str) -> pd.DataFrame:
         return pd.read_parquet(source)
     if storage.format == "csv":
         return pd.read_csv(source)
+    if storage.format == "xlsx":
+        return pd.read_excel(source, engine="openpyxl")
     raise ValueError(f"Formato de storage não suportado: {storage.format}")
 
 
