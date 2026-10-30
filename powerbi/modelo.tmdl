@@ -1,0 +1,230 @@
+createOrReplace
+
+	table fato_producao
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column quantidade_produzida_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: quantidade_produzida_t
+
+		column area_colhida_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_colhida_ha
+
+		column produtividade_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: produtividade_t_ha
+
+		column situacao_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_quantidade
+
+		column situacao_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_area
+
+		measure 'Produtividade' = IF(HASONEVALUE(dim_territorio[nivel_territorial]), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))
+			formatString: 0.00
+
+		measure 'Participação regional' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Total = CALCULATE(SUM(fato_producao[quantidade_produzida_t]), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), Total))
+			formatString: 0.00%
+
+		measure 'Desvio vs seleção' = VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN DIVIDE([Produtividade] - Referencia, Referencia)
+			formatString: 0.00%
+
+		measure 'Desvio vs grupo' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier), DIVIDE([Produtividade] - Referencia, Referencia))
+			formatString: 0.00%
+
+		partition fato_producao = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_producao.parquet"))
+
+	table dim_territorio
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column cod_local
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_local
+
+		column nome_territorio
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_territorio
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column cod_municipio
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_municipio
+
+		column cod_microrregiao
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_microrregiao
+
+		column cod_regiao_imediata
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_regiao_imediata
+
+		column nome_regiao_imediata
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_imediata
+
+		column cod_regiao_intermediaria
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_regiao_intermediaria
+
+		column nome_regiao_intermediaria
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_intermediaria
+
+		column cod_uf
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_uf
+
+		column mapeamento_regiao_2017
+			dataType: string
+			summarizeBy: none
+			sourceColumn: mapeamento_regiao_2017
+
+		column tier
+			dataType: string
+			summarizeBy: none
+			sourceColumn: tier
+
+		partition dim_territorio = m
+			mode: import
+			source =
+				let Fonte = Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_territorio.parquet")) in if Table.HasColumns(Fonte, "tier") then Fonte else Table.AddColumn(Fonte, "tier", each null, type text)
+
+	table dim_calendario
+		dataCategory: Time
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+			isKey
+			formatString: yyyy-MM-dd
+
+		column ano
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano
+
+		column mes
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: mes
+
+		column trimestre
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: trimestre
+
+		column dia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: dia
+
+		partition dim_calendario = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_calendario.parquet"))
+
+	table dim_fonte
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column fonte
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte
+
+		column tabela
+			dataType: string
+			summarizeBy: none
+			sourceColumn: tabela
+
+		column periodicidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: periodicidade
+
+		column unidade_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: unidade_quantidade
+
+		column unidade_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: unidade_area
+
+		column url
+			dataType: string
+			summarizeBy: none
+			sourceColumn: url
+
+		partition dim_fonte = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_fonte.parquet"))
+
+	relationship fato_dim_territorio
+		fromColumn: fato_producao.territorio_id
+		toColumn: dim_territorio.territorio_id
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_dim_calendario
+		fromColumn: fato_producao.data_referencia
+		toColumn: dim_calendario.data_referencia
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_dim_fonte
+		fromColumn: fato_producao.fonte_id
+		toColumn: dim_fonte.fonte_id
+		crossFilteringBehavior: oneDirection
