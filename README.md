@@ -59,10 +59,14 @@ Outputs per layer (in Parquet with zstd compression, versioned in the repository
 - `data/interim/` — cleaned and typed data
 - `data/processed/fato_producao.parquet` — annual production fact table (quantity, harvested area, productivity)
 - `data/processed/dim_territorio.parquet`, `dim_calendario.parquet`, `dim_fonte.parquet` — star-model dimensions
+- `data/processed/fato_industria.parquet` — CONAB sugar, ethanol, TRS and mix by state/harvest
+- `data/processed/fato_vendas_etanol_uf.parquet`, `fato_vendas_etanol_municipio.parquet` — annual ANP sales at separate grains
 
 The storage format is configurable in `config/settings.yaml` (`storage.format`):
 `parquet` (default), `csv`, or `xlsx`. The gold table grain, relationships, missing-value
 rules, and Power BI guidance are in [docs/entrega-etapa2/camada-gold.md](docs/entrega-etapa2/camada-gold.md).
+Industrial units, harvest alignment and ANP key validation are documented in
+[docs/entrega-etapa2/medidas-industriais.md](docs/entrega-etapa2/medidas-industriais.md).
 
 ## Tests
 
