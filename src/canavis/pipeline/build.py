@@ -9,6 +9,7 @@ from canavis.config import load_settings
 from canavis.domain import indicators
 from canavis.logging import get_logger
 from canavis.pipeline.industrial import construir_industria, construir_vendas
+from canavis.pipeline.temporal import enriquecer_serie
 
 _log = get_logger(__name__)
 _NIVEIS = {
@@ -27,6 +28,7 @@ def build_all() -> dict[str, Path]:
     tabelas = construir_estrela(
         storage.read(settings.paths.interim, "ibge_pam"), pd.read_parquet(_REFERENCIA)
     )
+    tabelas["fato_producao"] = enriquecer_serie(tabelas["fato_producao"])
     fontes = []
     if storage.exists(settings.paths.interim, "conab_cana"):
         tabelas["fato_industria"] = construir_industria(storage.read(settings.paths.interim, "conab_cana"))

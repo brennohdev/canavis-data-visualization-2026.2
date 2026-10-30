@@ -14,3 +14,4 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0006](0006-tiers-de-comparacao-por-clusterizacao.md) | Tiers de comparação por clusterização (agrupar por escala, comparar por eficiência) | Proposta |
 | [0007](0007-chuva-para-resiliencia-climatica.md) | Ancorar resiliência climática em dados de chuva (3 fontes testadas) | Rejeitada |
 | [0008](0008-tratamento-etapa2.md) | Tratamento Etapa 2: classificação de ausência, defasagem da PAM e de-para territorial | Aceita |
+| [0009](0009-serie-temporal-quebra-regime.md) | Decomposição histórica e teste exploratório de mudança de regime | Aceita |

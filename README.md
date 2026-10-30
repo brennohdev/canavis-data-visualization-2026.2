@@ -67,6 +67,9 @@ The storage format is configurable in `config/settings.yaml` (`storage.format`):
 rules, and Power BI guidance are in [docs/entrega-etapa2/camada-gold.md](docs/entrega-etapa2/camada-gold.md).
 Industrial units, harvest alignment and ANP key validation are documented in
 [docs/entrega-etapa2/medidas-industriais.md](docs/entrega-etapa2/medidas-industriais.md).
+Historical productivity trend, oscillation and the exploratory regime-change test
+are materialized in the production fact and documented in
+[ADR 0009](docs/decisoes/0009-serie-temporal-quebra-regime.md).
 
 ## Tests
 
