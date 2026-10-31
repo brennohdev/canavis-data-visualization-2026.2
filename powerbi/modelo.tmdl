@@ -1,0 +1,551 @@
+createOrReplace
+
+	table fato_producao
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column quantidade_produzida_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: quantidade_produzida_t
+
+		column area_colhida_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_colhida_ha
+
+		column produtividade_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: produtividade_t_ha
+
+		column situacao_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_quantidade
+
+		column situacao_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_area
+
+		column tendencia_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: tendencia_t_ha
+
+		column oscilacao_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: oscilacao_t_ha
+
+		column f_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: f_chow
+
+		column p_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: p_chow
+
+		column status_chow
+			dataType: string
+			summarizeBy: none
+			sourceColumn: status_chow
+
+		column ponto_candidato_quebra
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: ponto_candidato_quebra
+
+		column quebra_confirmada
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: quebra_confirmada
+
+		measure 'Produtividade' = IF(HASONEVALUE(dim_territorio[nivel_territorial]), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))
+			formatString: 0.00
+
+		measure 'Participação regional' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Total = CALCULATE(SUM(fato_producao[quantidade_produzida_t]), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), Total))
+			formatString: 0.00%
+
+		measure 'Desvio vs seleção' = VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN DIVIDE([Produtividade] - Referencia, Referencia)
+			formatString: 0.00%
+
+		measure 'Desvio vs grupo' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier), DIVIDE([Produtividade] - Referencia, Referencia))
+			formatString: 0.00%
+
+		measure 'Tendência histórica (t por ha)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[tendencia_t_ha]))
+			formatString: 0.00
+
+		measure 'Oscilação histórica (t por ha)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[oscilacao_t_ha]))
+			formatString: 0.00
+
+		measure 'P Chow exploratório (2003-2023)' = IF(HASONEVALUE(dim_territorio[territorio_id]), MAX(fato_producao[p_chow]))
+			formatString: 0.000000
+
+		partition fato_producao = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_producao.parquet"))
+
+	table fato_industria
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column uf
+			dataType: string
+			summarizeBy: none
+			sourceColumn: uf
+
+		column safra
+			dataType: string
+			summarizeBy: none
+			sourceColumn: safra
+
+		column ano_alinhamento
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_alinhamento
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column regra_alinhamento
+			dataType: string
+			summarizeBy: none
+			sourceColumn: regra_alinhamento
+
+		column situacao_levantamento
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_levantamento
+
+		column cana_mil_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: cana_mil_t
+
+		column area_plantada_mil_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_plantada_mil_ha
+
+		column producao_acucar_mil_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: producao_acucar_mil_t
+
+		column producao_etanol_anidro_mil_l
+			dataType: double
+			summarizeBy: none
+			sourceColumn: producao_etanol_anidro_mil_l
+
+		column producao_etanol_hidratado_mil_l
+			dataType: double
+			summarizeBy: none
+			sourceColumn: producao_etanol_hidratado_mil_l
+
+		column producao_etanol_total_mil_l
+			dataType: double
+			summarizeBy: none
+			sourceColumn: producao_etanol_total_mil_l
+
+		column atr_kg_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: atr_kg_t
+
+		column mix_etanol_acucar_l_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: mix_etanol_acucar_l_t
+
+		column intensidade_acucar_t_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: intensidade_acucar_t_t
+
+		measure 'Mix etanol açúcar (L por t)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && COUNTROWS(FILTER(fato_industria, ISBLANK(fato_industria[producao_etanol_total_mil_l]) || ISBLANK(fato_industria[producao_acucar_mil_t]))) = 0, DIVIDE(SUM(fato_industria[producao_etanol_total_mil_l]), SUM(fato_industria[producao_acucar_mil_t])))
+			formatString: 0.0000
+
+		measure 'Intensidade açúcar (t por t)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && COUNTROWS(FILTER(fato_industria, ISBLANK(fato_industria[producao_acucar_mil_t]) || ISBLANK(fato_industria[cana_mil_t]))) = 0, DIVIDE(SUM(fato_industria[producao_acucar_mil_t]), SUM(fato_industria[cana_mil_t])))
+			formatString: 0.0000
+
+		measure 'ATR ponderado (kg por t)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && COUNTROWS(FILTER(fato_industria, ISBLANK(fato_industria[atr_kg_t]) || ISBLANK(fato_industria[cana_mil_t]))) = 0, DIVIDE(SUMX(fato_industria, fato_industria[atr_kg_t] * fato_industria[cana_mil_t]), SUM(fato_industria[cana_mil_t])))
+			formatString: 0.00
+
+		partition fato_industria = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_industria.parquet"))
+
+	table fato_vendas_etanol_uf
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column uf
+			dataType: string
+			summarizeBy: none
+			sourceColumn: uf
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column escopo_vendas
+			dataType: string
+			summarizeBy: none
+			sourceColumn: escopo_vendas
+
+		column vendas_etanol_hidratado_l
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: vendas_etanol_hidratado_l
+
+		measure 'Vendas etanol UF (L)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf", SUM(fato_vendas_etanol_uf[vendas_etanol_hidratado_l]))
+			formatString: #,0
+
+		partition fato_vendas_etanol_uf = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_vendas_etanol_uf.parquet"))
+
+	table fato_vendas_etanol_municipio
+		column uf_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: uf_id
+
+		column uf
+			dataType: string
+			summarizeBy: none
+			sourceColumn: uf
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column escopo_vendas
+			dataType: string
+			summarizeBy: none
+			sourceColumn: escopo_vendas
+
+		column codigo_municipio_origem
+			dataType: string
+			summarizeBy: none
+			sourceColumn: codigo_municipio_origem
+
+		column nome_municipio_origem
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_municipio_origem
+
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column status_chave
+			dataType: string
+			summarizeBy: none
+			sourceColumn: status_chave
+
+		column vendas_etanol_hidratado_l
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: vendas_etanol_hidratado_l
+
+		measure 'Vendas etanol municípios validados (L)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "municipio", SUM(fato_vendas_etanol_municipio[vendas_etanol_hidratado_l]))
+			formatString: #,0
+
+		partition fato_vendas_etanol_municipio = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_vendas_etanol_municipio.parquet"))
+
+	table dim_territorio
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column cod_local
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_local
+
+		column nome_territorio
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_territorio
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column cod_municipio
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_municipio
+
+		column cod_microrregiao
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_microrregiao
+
+		column cod_regiao_imediata
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_regiao_imediata
+
+		column nome_regiao_imediata
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_imediata
+
+		column cod_regiao_intermediaria
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_regiao_intermediaria
+
+		column nome_regiao_intermediaria
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_intermediaria
+
+		column cod_uf
+			dataType: string
+			summarizeBy: none
+			sourceColumn: cod_uf
+
+		column mapeamento_regiao_2017
+			dataType: string
+			summarizeBy: none
+			sourceColumn: mapeamento_regiao_2017
+
+		column tier
+			dataType: string
+			summarizeBy: none
+			sourceColumn: tier
+
+		partition dim_territorio = m
+			mode: import
+			source =
+				let Fonte = Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_territorio.parquet")) in if Table.HasColumns(Fonte, "tier") then Fonte else Table.AddColumn(Fonte, "tier", each null, type text)
+
+	table dim_calendario
+		dataCategory: Time
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+			isKey
+			formatString: yyyy-MM-dd
+
+		column ano
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano
+
+		column mes
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: mes
+
+		column trimestre
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: trimestre
+
+		column dia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: dia
+
+		partition dim_calendario = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_calendario.parquet"))
+
+	table dim_fonte
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column fonte
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte
+
+		column tabela
+			dataType: string
+			summarizeBy: none
+			sourceColumn: tabela
+
+		column periodicidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: periodicidade
+
+		column unidade_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: unidade_quantidade
+
+		column unidade_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: unidade_area
+
+		column url
+			dataType: string
+			summarizeBy: none
+			sourceColumn: url
+
+		partition dim_fonte = m
+			mode: import
+			source =
+				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_fonte.parquet"))
+
+	relationship fato_dim_territorio
+		fromColumn: fato_producao.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_dim_calendario
+		fromColumn: fato_producao.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_dim_fonte
+		fromColumn: fato_producao.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_industria_dim_territorio
+		fromColumn: fato_industria.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_industria_dim_calendario
+		fromColumn: fato_industria.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_industria_dim_fonte
+		fromColumn: fato_industria.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_uf_dim_territorio
+		fromColumn: fato_vendas_etanol_uf.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_uf_dim_calendario
+		fromColumn: fato_vendas_etanol_uf.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_uf_dim_fonte
+		fromColumn: fato_vendas_etanol_uf.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_municipio_dim_territorio
+		fromColumn: fato_vendas_etanol_municipio.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_municipio_dim_calendario
+		fromColumn: fato_vendas_etanol_municipio.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_vendas_etanol_municipio_dim_fonte
+		fromColumn: fato_vendas_etanol_municipio.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection

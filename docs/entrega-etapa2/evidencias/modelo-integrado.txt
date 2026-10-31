@@ -1,0 +1,12 @@
+														2031 graphic Relação Muitos para um de fato_producao para dim_calendario
+														2032 graphic Relação Muitos para um de fato_industria para dim_calendario
+														2033 graphic Relação Muitos para um de fato_vendas_etanol_uf para dim_calendario
+														2034 graphic Relação Muitos para um de fato_vendas_etanol_municipio para dim_calendario
+														2035 graphic Relação Muitos para um de fato_producao para dim_fonte
+														2036 graphic Relação Muitos para um de fato_industria para dim_fonte
+														2037 graphic Relação Muitos para um de fato_vendas_etanol_uf para dim_fonte
+														2038 graphic Relação Muitos para um de fato_vendas_etanol_municipio para dim_fonte
+														2039 graphic Relação Muitos para um de fato_producao para dim_territorio
+														2040 graphic Relação Muitos para um de fato_industria para dim_territorio
+														2041 graphic Relação Muitos para um de fato_vendas_etanol_uf para dim_territorio
+														2042 graphic Relação Muitos para um de fato_vendas_etanol_municipio para dim_territorio
