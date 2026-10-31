@@ -24,3 +24,6 @@ data/**/*.csv
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Artefatos de workflow de agentes (review.json, pr.json, etc.)
+.agents/
