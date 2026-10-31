@@ -83,3 +83,93 @@ def test_media_recente_usa_apenas_ultimos_anos():
     # 2018 (valor 100 para x) fica de fora: média de 10,20,30,40,50 = 30.
     assert media["x"] == pytest.approx(30.0)
     assert media["y"] == pytest.approx(4.0)
+
+
+def test_perfil_valor_concentra_no_tier_de_maior_escala():
+    # Valor descritivo: o tier grande deve concentrar a maior fatia, sem que o
+    # valor tenha participado do agrupamento. Percentuais somam 100.
+    quantidade = pd.Series(
+        {"a": 4e8, "b": 7e7, "c": 5e7, "d": 5e6, "e": 3e6, "f": 2e3, "g": 1e3}
+    )
+    rotulos = tiers.classificar_tiers(quantidade)
+    valor = pd.Series(
+        {"a": 950.0, "b": 30.0, "c": 20.0, "d": 3.0, "e": 2.0, "f": 0.1, "g": 0.1}
+    )
+    perfil = tiers.perfil_valor_por_tier(valor, rotulos)
+    assert perfil.sum() == pytest.approx(100.0)
+    assert perfil.idxmax() == tiers.ROTULOS[0]
+    assert perfil[tiers.ROTULOS[0]] > perfil[tiers.ROTULOS[1]] > perfil[tiers.ROTULOS[2]]
+
+
+# --- Evidência reproduzível do gate sobre os dados reais da silver ---------
+# Os números do gate do ADR 0006 (dispersão, concordância com Ward, perfil de
+# valor) são recomputados aqui sobre a camada silver real, para que a evidência
+# seja verificável e não apenas afirmada. Se a silver não estiver materializada
+# no ambiente, o teste é pulado em vez de falhar.
+
+
+def _ufs_reais():
+    pytest.importorskip("pyarrow")
+    from canavis import storage
+    from canavis.config import load_settings
+
+    settings = load_settings()
+    if not storage.exists(settings.paths.interim, "ibge_pam"):
+        pytest.skip("Silver ibge_pam não materializada neste ambiente")
+    df = storage.read(settings.paths.interim, "ibge_pam")
+    uf = df[df["extracao"] == "serie_ufs_brasil"].copy()
+    uf["periodo"] = uf["periodo"].astype(int)
+    qt = uf[uf["variavel"] == "Quantidade produzida"]
+    quantidade = tiers.media_recente(qt["periodo"], qt["valor"], qt["local"])
+    val = uf[uf["variavel"] == "Valor da produção"]
+    valor = tiers.media_recente(val["periodo"], val["valor"], val["local"])
+    return quantidade, valor
+
+
+def test_gate_real_cobertura_e_dispersao_das_27_ufs():
+    quantidade, _ = _ufs_reais()
+    rotulos = tiers.classificar_tiers(quantidade)
+    assert quantidade.index.nunique() == 27
+    assert rotulos.notna().all()
+    assert rotulos.index.is_unique
+    assert tiers.dispersao_intra_tier(quantidade, rotulos) < tiers.dispersao_log(quantidade)
+
+
+def test_gate_real_concordancia_com_ward_hierarquico():
+    # Item (c) do gate recomputado sobre as 27 UFs reais: a partição de
+    # classificar_tiers deve coincidir com Ward aglomerativo em 1D sobre o log.
+    quantidade, _ = _ufs_reais()
+    rotulos = tiers.classificar_tiers(quantidade)
+
+    def ward_1d(valores, k):
+        ordenado = np.sort(valores)
+        grupos = [[v] for v in ordenado]
+        ess = lambda c: float(((np.array(c) - np.mean(c)) ** 2).sum())
+        while len(grupos) > k:
+            custos = [ess(grupos[i] + grupos[i + 1]) - ess(grupos[i]) - ess(grupos[i + 1])
+                      for i in range(len(grupos) - 1)]
+            i = int(np.argmin(custos))
+            grupos[i:i + 2] = [grupos[i] + grupos[i + 1]]
+        rotulo = {}
+        for ordem, grupo in enumerate(reversed(grupos)):
+            for v in grupo:
+                rotulo[v] = ordem
+        return rotulo
+
+    log = np.log(quantidade.to_numpy(dtype="float64"))
+    ward = ward_1d(log, 3)
+    tier_para_indice = {r: i for i, r in tiers.ROTULOS.items()}
+    atribuido = {u: tier_para_indice[rotulos[u]] for u in quantidade.index}
+    esperado = {u: ward[np.log(quantidade[u])] for u in quantidade.index}
+    assert atribuido == esperado
+
+
+def test_gate_real_perfil_de_valor_concentra_no_tier_grande():
+    # Item (e) do gate recomputado: ~94,8% / 5,1% / ~0,0% do valor por tier.
+    quantidade, valor = _ufs_reais()
+    rotulos = tiers.classificar_tiers(quantidade)
+    perfil = tiers.perfil_valor_por_tier(valor, rotulos)
+    assert perfil.sum() == pytest.approx(100.0)
+    assert perfil[tiers.ROTULOS[0]] == pytest.approx(94.8, abs=1.0)
+    assert perfil[tiers.ROTULOS[1]] == pytest.approx(5.1, abs=1.0)
+    assert perfil[tiers.ROTULOS[2]] < 1.0

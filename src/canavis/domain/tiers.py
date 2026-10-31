@@ -96,6 +96,25 @@ def classificar_tiers(quantidade_por_unidade: pd.Series, n_grupos: int = 3) -> p
     return resultado
 
 
+def perfil_valor_por_tier(valor_por_unidade: pd.Series, tiers: pd.Series) -> pd.Series:
+    """Participação (%) do valor da produção concentrada em cada tier.
+
+    Variável puramente descritiva do gate (item (e) do ADR 0006): perfila cada
+    grupo pela fatia do valor monetário que concentra, sem jamais ter formado os
+    grupos. O valor entra só aqui, para leitura; nunca como critério de
+    agrupamento nem como medida materializada na gold. Unidades sem tier ou sem
+    valor conhecido são ignoradas. Devolve percentuais indexados pelo rótulo.
+    """
+    dados = pd.DataFrame({"valor": valor_por_unidade, "tier": tiers}).dropna()
+    if dados.empty:
+        return pd.Series(dtype="float64")
+    total = dados["valor"].sum()
+    if total == 0:
+        return pd.Series(0.0, index=sorted(dados["tier"].unique()))
+    participacao = dados.groupby("tier")["valor"].sum() / total * 100.0
+    return participacao.reindex([r for r in ROTULOS.values() if r in participacao.index])
+
+
 def dispersao_log(quantidade_por_unidade: pd.Series) -> float:
     """Desvio-padrão do log da quantidade; a dispersão de escala da base."""
     serie = quantidade_por_unidade.dropna()
