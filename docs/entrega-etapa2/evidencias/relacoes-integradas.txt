@@ -1,0 +1,12 @@
+														2258 row Selecionar Linha 2 fato_industria (data_referencia) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_calendario (data_referencia) Ativo Menu de contexto
+														2278 row Selecionar Linha 3 fato_industria (fonte_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_fonte (fonte_id) Ativo Menu de contexto
+														2298 row Selecionar Linha 4 fato_industria (territorio_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_territorio (territorio_id) Ativo Menu de contexto
+														2318 row Selecionar Linha 5 fato_producao (data_referencia) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_calendario (data_referencia) Ativo Menu de contexto
+														2338 row Selecionar Linha 6 fato_producao (fonte_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_fonte (fonte_id) Ativo Menu de contexto
+														2358 row Selecionar Linha 7 fato_producao (territorio_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_territorio (territorio_id) Ativo Menu de contexto
+														2378 row Selecionar Linha 8 fato_vendas_etanol_municipio (data_referencia) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_calendario (data_referencia) Ativo Menu de contexto
+														2398 row Selecionar Linha 9 fato_vendas_etanol_municipio (fonte_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_fonte (fonte_id) Ativo Menu de contexto
+														2418 row Selecionar Linha 10 fato_vendas_etanol_municipio (territorio_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_territorio (territorio_id) Ativo Menu de contexto
+														2438 row Selecionar Linha 11 fato_vendas_etanol_uf (data_referencia) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_calendario (data_referencia) Ativo Menu de contexto
+														2458 row Selecionar Linha 12 fato_vendas_etanol_uf (fonte_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_fonte (fonte_id) Ativo Menu de contexto
+														2478 row Selecionar Linha 13 fato_vendas_etanol_uf (territorio_id) Cardinalidade Muitos para um Direção do filtro cruzado Único dim_territorio (territorio_id) Ativo Menu de contexto

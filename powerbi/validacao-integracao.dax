@@ -1,0 +1,30 @@
+// Executar na exibição de consultas DAX após aplicar modelo.tmdl e atualizar.
+// Valores esperados calculados na gold; tolerância de 0,000001 para taxas.
+EVALUATE
+VAR Casos = UNION(
+    ROW("Cenario", "PAM PB 2023", "Valor", CALCULATE([Produtividade], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", 64.69238444849273),
+    ROW("Cenario", "PAM PB 2022", "Valor", CALCULATE([Produtividade], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2022), "Esperado", 56.276604263713516),
+    ROW("Cenario", "Mix PB safra 2023/24", "Valor", CALCULATE([Mix etanol açúcar (L por t)], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", 1592.3552631578948),
+    ROW("Cenario", "ATR PB safra 2023/24", "Valor", CALCULATE([ATR ponderado (kg por t)], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", 124.4),
+    ROW("Cenario", "ANP PB 2023 litros", "Valor", CALCULATE([Vendas etanol UF (L)], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", 126411400),
+    ROW("Cenario", "ANP PB 2022 litros", "Valor", CALCULATE([Vendas etanol UF (L)], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2022), "Esperado", 124006860),
+    ROW("Cenario", "ANP Água Branca 2023 litros", "Valor", CALCULATE([Vendas etanol municípios validados (L)], dim_territorio[territorio_id] = "municipio:2500106", dim_calendario[ano] = 2023), "Esperado", 67000),
+    ROW("Cenario", "Tendência PB 2023 borda", "Valor", CALCULATE([Tendência histórica (t por ha)], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Mix em município indisponível", "Valor", CALCULATE([Mix etanol açúcar (L por t)], dim_territorio[territorio_id] = "municipio:2500106", dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Produtividade sem nível único", "Valor", [Produtividade], "Esperado", BLANK()),
+    ROW("Cenario", "Grupo sem tier indisponível", "Valor", CALCULATE([Desvio vs grupo], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", BLANK())
+)
+RETURN ADDCOLUMNS(Casos, "Confere", IF(ISBLANK([Esperado]), ISBLANK([Valor]), NOT ISBLANK([Valor]) && ABS([Valor] - [Esperado]) < 0.000001))
+ORDER BY [Cenario]
+
+EVALUATE
+ROW(
+    "PAM", COUNTROWS(fato_producao),
+    "CONAB", COUNTROWS(fato_industria),
+    "ANP UF", COUNTROWS(fato_vendas_etanol_uf),
+    "ANP detalhe", COUNTROWS(fato_vendas_etanol_municipio),
+    "Territorios", COUNTROWS(dim_territorio),
+    "Dias", COUNTROWS(dim_calendario),
+    "Fontes", COUNTROWS(dim_fonte),
+    "Tendencias", COUNT(fato_producao[tendencia_t_ha])
+)
