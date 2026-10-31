@@ -40,10 +40,14 @@ As expressões completas estão no script TMDL, como medidas da fato.
 
 | Nome | DAX / regra | Pergunta | Onde usar |
 | --- | --- | --- | --- |
-| Produtividade | `IF(HASONEVALUE(dim_territorio[nivel_territorial]), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))` | Quanto se produz por hectare? | Ranking por UF e cartão |
-| Participação regional | `VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Total = CALCULATE(SUM(fato_producao[quantidade_produzida_t]), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), Total))` | Quanto o território representa no total desse nível? | Participação por UF |
-| Desvio vs seleção | `VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN DIVIDE([Produtividade] - Referencia, Referencia)` | Quanto difere do conjunto selecionado? | Comparação geral |
-| Desvio vs grupo | `VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier), DIVIDE([Produtividade] - Referencia, Referencia))` | Quanto difere dos pares selecionados? | Comparação por tier após Task 4 |
+| Produtividade | `DIVIDE(SUM(quantidade), SUM(area))`, condicionado a nível único e ausência de parcelas nulas em quantidade/área | Quanto se produz por hectare? | Ranking por UF e cartão |
+| Participação regional | Razão de produção por total do nível; `CALCULATE`/`ALL` altera o denominador; numerador e denominador precisam estar completos | Quanto o território representa no total desse nível? | Participação por UF |
+| Desvio vs seleção | Referência com `CALCULATE([Produtividade], ALLSELECTED(dim_territorio))`; `DIVIDE(Atual - Referencia, Referencia)` somente quando Atual e Referencia não estão vazios | Quanto difere do conjunto selecionado? | Comparação geral |
+| Desvio vs grupo | Mesma proteção de ausência, com `ALLSELECTED` e `KEEPFILTERS(dim_territorio[tier] = Tier)`; exige tier não vazio | Quanto difere dos pares selecionados? | Comparação por tier após Task 4 |
+
+As regras acima resumem o DAX; o código integral das quatro medidas corrigidas
+está em [`powerbi/correcao-ausencias.tmdl`](../../powerbi/correcao-ausencias.tmdl)
+e no modelo completo, ambos gerados pela mesma função `medidas_producao`.
 
 **Dependência pendente:** a issue #8 (Task 4) ainda precisa materializar tiers validados na gold. O desvio de grupo não deve ser apresentado como validado antes disso. O desvio da seleção é uma referência geral e não substitui a comparação por pares.
 
@@ -180,3 +184,73 @@ Evidências desta rodada:
 
 Referência da operação TMDL e necessidade de atualização posterior:
 [documentação Microsoft](https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-tmdl-view).
+
+## Correção de ausências nas medidas — issue #11, 31/10/2026
+
+**Branch:** `fix/powerbi-ausencias-medidas`, criada a partir da integração.
+A revisão encontrou dois casos não cobertos pelos 11 testes iniciais: desvio
+de −100% para produtividade ausente e produtividade agregada parcial apresentada
+como completa. A validação inicial por UF não cobria esses recortes municipais.
+
+### Comportamento corrigido
+
+- **Produtividade:** mantém soma de quantidade / soma de área, mas somente se
+  nenhuma parcela do contexto estiver nula nas duas colunas e houver um único
+  nível territorial. Qualquer parcela ausente torna o agregado indisponível,
+  conforme `pipeline.build.agregar_producao`. Não usa média de produtividades.
+- **Participação regional:** tanto a quantidade do território quanto o total
+  do nível precisam estar completos. O denominador continua usando `ALL` e
+  respeitando o nível e os demais filtros, como ano e fonte.
+- **Desvios por seleção e grupo:** verificam `ISBLANK(Atual)` e
+  `ISBLANK(Referencia)` antes de subtrair, evitando interpretar ausência como
+  zero. `DIVIDE` mantém a proteção para referência igual a zero. O desvio por
+  grupo também exige tier preenchido; sua validação com grupos reais continua
+  dependente da #8.
+- Zero informado continua sendo zero: não é substituído por nulo. Área zero
+  torna a produtividade individual indefinida, mas não invalida a soma de
+  quantidade/área de uma seleção completa com área total positiva.
+
+### Evidência e resultado
+
+Recorte municipal de 2023:
+
+| Caso | Antes | Depois / esperado |
+|---|---|---|
+| Aguiar (`2500205`), 200 t / 5 ha | 40 t/ha | 40 t/ha |
+| Cabedelo (`2503209`), produção e área suprimidas | Produtividade vazia; desvio −100% na seleção com Aguiar | Produtividade e desvio vazios |
+| Aguiar + Cabedelo | 40 t/ha com parcela ignorada | Agregado vazio por incompletude |
+| Aguiar + Água Branca (`2500106`, 0 t / 0 ha) | 40 t/ha | 40 t/ha: zero real preservado |
+| Participação de Aguiar no total municipal | Razão contra total parcial | Vazia enquanto o denominador contém dado suprimido |
+
+O desvio de Aguiar na seleção com Cabedelo também fica vazio: o próprio valor
+é conhecido, mas a referência da seleção está incompleta. No recorte completo
+das UFs, a participação da PB em 2023 continua em **0,9036158274%** e o desvio
+frente à referência nacional ponderada em **−16,9555406617%**.
+
+O script `powerbi/validacao-ausencias.dax` tem **12 cenários de regressão**,
+todos executados no Power BI Desktop com `Confere = True`; a consulta está
+salva como **Consulta 3** no PBIX. Os **11 cenários de integração** da Consulta 2
+também foram reexecutados e passaram: **23 cenários DAX aprovados**, além de
+**49 testes Python**. Foram conferidos nulos, zeros reais, seleções completas
+e incompletas, produtividade, participação e desvio. A comparação entre tiers
+reais permanece fora dessa aprovação.
+
+Evidências: [correção aplicada](evidencias/correcao-ausencias-aplicada.png),
+[regressões de ausência](evidencias/regressao-ausencias.png) e
+[12 resultados em texto](evidencias/regressao-ausencias.txt),
+[integração revalidada](evidencias/regressao-integracao.png) e
+[11 resultados em texto](evidencias/regressao-integracao.txt), além do
+[relatório corrigido e salvo em 2023](evidencias/correcao-ausencias-uf-2023.png).
+
+### Reprodução
+
+1. Executar `uv run python scripts/gerar_modelo_powerbi.py`.
+2. Em PBIX já carregado, aplicar `powerbi/correcao-ausencias.tmdl` na exibição
+   TMDL. Esse arquivo altera somente as quatro medidas, preservando dados,
+   partições, relações e visuais. Não requer recarregar tabelas.
+3. Executar `powerbi/validacao-ausencias.dax` e `powerbi/validacao-integracao.dax`.
+   Todas as linhas de cenários devem ter `Confere = True`.
+4. Salvar o PBIX na página Validação UF com ano 2023.
+
+O modelo completo `powerbi/modelo.tmdl` também contém as correções, para que
+uma reconstrução futura não restaure as fórmulas anteriores.

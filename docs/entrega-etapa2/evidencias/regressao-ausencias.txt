@@ -1,0 +1,12 @@
+											2109 row 1 Desvio PB em seleção UF completa -0.17 -0.17 True
+											2119 row 2 Desvio seleção com zero real: municipio:2500106 True
+											2129 row 3 Desvio seleção com zero real: municipio:2500205 0 0 True
+											2139 row 4 Desvio seleção incompleta: municipio:2500205 True
+											2149 row 5 Desvio seleção incompleta: municipio:2503209 True
+											2159 row 6 Participação municipal com denominador incompleto True
+											2169 row 7 Participação PB em total UF completo 0.01 0.01 True
+											2179 row 8 Participação suprimida de Cabedelo True
+											2189 row 9 Produtividade Aguiar + Água Branca com zero real 40 40 True
+											2199 row 10 Produtividade Aguiar + Cabedelo incompleta True
+											2209 row 11 Produtividade de Aguiar continua disponível 40 40 True
+											2219 row 12 Produtividade suprimida de Cabedelo True

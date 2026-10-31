@@ -1,0 +1,11 @@
+											2271 row 1 ANP Água Branca 2023 litros 67000 67000 True
+											2281 row 2 ANP PB 2022 litros 124006860 124006860 True
+											2291 row 3 ANP PB 2023 litros 126411400 126411400 True
+											2301 row 4 ATR PB safra 2023/24 124.4 124.4 True
+											2311 row 5 Grupo sem tier indisponível True
+											2321 row 6 Mix em município indisponível True
+											2331 row 7 Mix PB safra 2023/24 1592.36 1592.36 True
+											2341 row 8 PAM PB 2022 56.28 56.28 True
+											2351 row 9 PAM PB 2023 64.69 64.69 True
+											2361 row 10 Produtividade sem nível único True
+											2371 row 11 Tendência PB 2023 borda True

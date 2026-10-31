@@ -1,0 +1,30 @@
+// Regressão da issue #11: executar após correcao-ausencias.tmdl.
+// As linhas são mantidas mesmo quando todas as medidas ficam vazias.
+EVALUATE
+VAR RecorteIncompleto = CALCULATETABLE(
+    SUMMARIZECOLUMNS(dim_territorio[territorio_id],
+        "Produtividade", [Produtividade], "Desvio", [Desvio vs seleção], "Manter", 1),
+    TREATAS({"municipio:2500205", "municipio:2503209"}, dim_territorio[territorio_id]),
+    dim_calendario[ano] = 2023)
+VAR RecorteZero = CALCULATETABLE(
+    SUMMARIZECOLUMNS(dim_territorio[territorio_id],
+        "Produtividade", [Produtividade], "Desvio", [Desvio vs seleção], "Manter", 1),
+    TREATAS({"municipio:2500205", "municipio:2500106"}, dim_territorio[territorio_id]),
+    dim_calendario[ano] = 2023)
+VAR ReferenciasUF = CALCULATETABLE(
+    SUMMARIZECOLUMNS(dim_territorio[territorio_id], "Desvio", [Desvio vs seleção]),
+    dim_territorio[nivel_territorial] = "uf", dim_calendario[ano] = 2023)
+VAR Casos = UNION(
+    SELECTCOLUMNS(RecorteIncompleto, "Cenario", "Desvio seleção incompleta: " & dim_territorio[territorio_id], "Valor", [Desvio], "Esperado", BLANK()),
+    SELECTCOLUMNS(RecorteZero, "Cenario", "Desvio seleção com zero real: " & dim_territorio[territorio_id], "Valor", [Desvio], "Esperado", IF(dim_territorio[territorio_id] = "municipio:2500205", 0, BLANK())),
+    ROW("Cenario", "Produtividade de Aguiar continua disponível", "Valor", CALCULATE([Produtividade], dim_territorio[territorio_id] = "municipio:2500205", dim_calendario[ano] = 2023), "Esperado", 40),
+    ROW("Cenario", "Produtividade suprimida de Cabedelo", "Valor", CALCULATE([Produtividade], dim_territorio[territorio_id] = "municipio:2503209", dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Produtividade Aguiar + Cabedelo incompleta", "Valor", CALCULATE([Produtividade], TREATAS({"municipio:2500205", "municipio:2503209"},dim_territorio[territorio_id]), dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Produtividade Aguiar + Água Branca com zero real", "Valor", CALCULATE([Produtividade], TREATAS({"municipio:2500205", "municipio:2500106"},dim_territorio[territorio_id]), dim_calendario[ano] = 2023), "Esperado", 40),
+    ROW("Cenario", "Participação municipal com denominador incompleto", "Valor", CALCULATE([Participação regional], dim_territorio[territorio_id] = "municipio:2500205", dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Participação suprimida de Cabedelo", "Valor", CALCULATE([Participação regional], dim_territorio[territorio_id] = "municipio:2503209", dim_calendario[ano] = 2023), "Esperado", BLANK()),
+    ROW("Cenario", "Participação PB em total UF completo", "Valor", CALCULATE([Participação regional], dim_territorio[territorio_id] = "uf:25", dim_calendario[ano] = 2023), "Esperado", 0.009036158274023981),
+    ROW("Cenario", "Desvio PB em seleção UF completa", "Valor", MAXX(FILTER(ReferenciasUF, dim_territorio[territorio_id] = "uf:25"), [Desvio]), "Esperado", -0.16955540661679036)
+)
+RETURN ADDCOLUMNS(Casos, "Confere", IF(ISBLANK([Esperado]), ISBLANK([Valor]), NOT ISBLANK([Valor]) && ABS([Valor] - [Esperado]) < 0.000001))
+ORDER BY [Cenario]
