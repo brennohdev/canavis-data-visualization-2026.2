@@ -8,6 +8,7 @@ from canavis import storage
 from canavis.config import load_settings
 from canavis.domain import indicators
 from canavis.logging import get_logger
+from canavis.pipeline.industrial import construir_industria, construir_vendas
 
 _log = get_logger(__name__)
 _NIVEIS = {
@@ -26,6 +27,29 @@ def build_all() -> dict[str, Path]:
     tabelas = construir_estrela(
         storage.read(settings.paths.interim, "ibge_pam"), pd.read_parquet(_REFERENCIA)
     )
+    fontes = []
+    if storage.exists(settings.paths.interim, "conab_cana"):
+        tabelas["fato_industria"] = construir_industria(storage.read(settings.paths.interim, "conab_cana"))
+        fontes.append({"fonte_id": "conab_cana", "fonte": "CONAB", "tabela": "Série Histórica da Cana",
+                       "periodicidade": "safra", "unidade_quantidade": "mil toneladas / mil litros",
+                       "unidade_area": "mil hectares", "url": "https://portaldeinformacoes.conab.gov.br/downloads/arquivos/SerieHistoricaCana.txt"})
+    if storage.exists(settings.paths.interim, "anp_vendas_etanol"):
+        tabelas.update(construir_vendas(storage.read(settings.paths.interim, "anp_vendas_etanol"), tabelas["dim_territorio"]))
+        fontes.append({"fonte_id": "anp_vendas_etanol", "fonte": "ANP", "tabela": "Vendas anuais de etanol hidratado por município",
+                       "periodicidade": "anual", "unidade_quantidade": "litros", "unidade_area": None,
+                       "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/vendas-de-derivados-de-petroleo-e-biocombustiveis"})
+    if fontes:
+        tabelas["dim_fonte"] = pd.concat([tabelas["dim_fonte"], pd.DataFrame(fontes)], ignore_index=True)
+    datas = pd.concat([f["data_referencia"] for nome, f in tabelas.items() if nome.startswith("fato_")])
+    tabelas["dim_calendario"] = _dim_calendario(datas.dt.year.min(), datas.dt.year.max())
+    for nome, frame in tabelas.items():
+        if not nome.startswith("fato_"):
+            continue
+        for coluna in ["territorio_id", "uf_id"]:
+            if coluna in frame and not frame[coluna].dropna().isin(tabelas["dim_territorio"]["territorio_id"]).all():
+                raise ValueError(f"{nome}: chave territorial sem dimensão")
+        if not frame["fonte_id"].isin(tabelas["dim_fonte"]["fonte_id"]).all():
+            raise ValueError(f"{nome}: fonte sem dimensão")
     escritos = {}
     for nome, frame in tabelas.items():
         destino = storage.write(frame, settings.paths.processed, nome)

@@ -116,6 +116,33 @@ ficam `None` quando há mais de uma região possível. A flag
 
 ## Consequências
 
+### Atualização — alinhamento industrial (issue #7, 30/10/2026)
+
+A safra CONAB `AAAA/AA+1` é associada ao **ano inicial** para navegação conjunta
+com PAM e ANP: `2023/24 → 2023`. `safra` permanece na fato, e a chave anual é
+denominada `ano_alinhamento`, com `regra_alinhamento = ano_inicial_safra`.
+A data 31/12 é somente âncora desse ano. Trata-se de convenção analítica do
+projeto: não transforma a safra em observação de janeiro a dezembro e não
+distribui produção entre meses. Não se afirma igualdade dos períodos.
+
+As medidas de indústria ficam em fato própria, no grão UF/safra; as vendas
+ficam em fatos próprias por UF/ano e município de origem/ano. O mix usa etanol
+e açúcar da mesma observação CONAB, e a intensidade usa açúcar e cana da CONAB,
+evitando dividir numerador de safra por denominador anual da PAM.
+
+Os campos de levantamento são preservados. `PREVISAO` é o rótulo do arquivo,
+sem inferir que todo registro histórico seja previsão preliminar ou definitivo.
+
+A ANP publica vendas em litros e informa mudança de escopo em 2007: até 2006
+inclui consumo próprio das distribuidoras; depois, somente vendas. A coluna
+`escopo_vendas` registra essa mudança, conforme o [metadado oficial](https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/etanol-hidratado/metadados-vendas-anuais-de-etanol-hidratado-por-municipio.pdf).
+Repetições de todas as colunas são removidas antes de somar. Valores conflitantes
+para a mesma UF/código/ano provocam erro; não se escolhe uma linha silenciosamente.
+O vínculo municipal exige código e nome conferidos contra a dimensão atual da PB.
+Ausência de correspondência não significa erro comprovado: pode envolver
+mudança histórica de código/nome. O registro fica preservado, com chave de
+junção nula, e os totais por UF usam a UF publicada na fonte.
+
 - `_transform_ibge` passa a devolver todas as linhas (28.665) com a coluna
   `situacao_valor`; os 15.176 `-` viram zero real e os 130 `...` ficam `NA`
   rotulados como `suprimido`. Quem consome a camada silver precisa filtrar por

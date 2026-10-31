@@ -89,6 +89,8 @@ def transform_all() -> dict[str, Path]:
 
 
 def _to_numeric(series: pd.Series) -> pd.Series:
+    if pd.api.types.is_numeric_dtype(series):
+        return pd.to_numeric(series, errors="coerce")
     cleaned = series.astype(str).str.strip().replace(_MISSING_TOKENS, pd.NA)
     cleaned = cleaned.str.replace(".", "", regex=False).str.replace(",", ".", regex=False)
     return pd.to_numeric(cleaned, errors="coerce")
@@ -111,8 +113,11 @@ def _transform_ibge(frame: pd.DataFrame) -> pd.DataFrame:
 
 def _transform_conab(frame: pd.DataFrame) -> pd.DataFrame:
     frame = frame.copy()
+    text_columns = {"ano_agricola", "dsc_safra_previsao", "uf", "produto", "dsc_situacao_levantamento"}
     for column in frame.columns:
-        if column not in {"ano_agricola", "dsc_safra_previsao", "uf", "produto", "dsc_situacao_levantamento"}:
+        if column in text_columns:
+            frame[column] = frame[column].astype("string").str.strip()
+        else:
             frame[column] = _to_numeric(frame[column])
     return frame
 
