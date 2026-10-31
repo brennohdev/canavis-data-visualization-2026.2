@@ -92,6 +92,44 @@ def test_niveis_diferentes_nao_sao_somados_juntos():
         agregar_producao(frame, ["ano_referencia"])
 
 
+def _dados_com_ufs():
+    """Município (PB) mais três UFs de escalas distintas, para exercitar tier."""
+    pam, referencia = _dados()
+    ufs = [
+        ("35", "São Paulo", 4.0e8, 5.0e6),
+        ("52", "Goiás", 7.0e7, 1.0e6),
+        ("14", "Roraima", 2.0e3, 1.0e2),
+    ]
+    linhas = []
+    for codigo, nome, quantidade, area in ufs:
+        for variavel, valor in [("Quantidade produzida", quantidade), ("Área colhida", area)]:
+            linhas.append({"extracao": "serie_ufs_brasil", "cod_local": codigo,
+                           "local": nome, "periodo": 2023, "variavel": variavel,
+                           "valor": valor, "situacao_valor": "presente"})
+    pam = pd.concat([pam, pd.DataFrame(linhas)], ignore_index=True)
+    return pam, referencia
+
+
+def test_tier_preenchido_para_ufs_e_nulo_para_outros_niveis():
+    tabelas = construir_estrela(*_dados_com_ufs())
+    dim = tabelas["dim_territorio"].set_index("territorio_id")
+    assert "tier" in dim.columns
+    ufs = dim[dim["nivel_territorial"] == "uf"]
+    assert ufs["tier"].notna().all()
+    assert dim.loc[dim["nivel_territorial"] == "municipio", "tier"].isna().all()
+    # São Paulo (maior escala) deve cair no tier grande; Roraima no pequeno.
+    assert "grande" in dim.loc["uf:35", "tier"]
+    assert "pequena" in dim.loc["uf:14", "tier"]
+
+
+def test_tier_preserva_integridade_referencial_da_estrela():
+    tabelas = construir_estrela(*_dados_com_ufs())
+    fato = tabelas["fato_producao"]
+    dim = tabelas["dim_territorio"]
+    assert fato["territorio_id"].isin(dim["territorio_id"]).all()
+    assert dim["territorio_id"].is_unique
+
+
 @pytest.mark.parametrize("formato", ["parquet", "csv", "xlsx"])
 def test_formatos_de_exportacao_preservam_nulo_e_zero(tmp_path, monkeypatch, formato):
     from types import SimpleNamespace
