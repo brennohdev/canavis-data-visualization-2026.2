@@ -254,3 +254,19 @@ Evidências: [correção aplicada](evidencias/correcao-ausencias-aplicada.png),
 
 O modelo completo `powerbi/modelo.tmdl` também contém as correções, para que
 uma reconstrução futura não restaure as fórmulas anteriores.
+
+## Tiers materializados na gold (Task 4, issue #8)
+
+A dependência pendente acima foi resolvida: `dim_territorio` agora traz a coluna
+`tier` preenchida para as **27 UFs** e nula para municípios e microrregiões. Os
+grupos vêm de cortes em `log(quantidade_produzida_t)` sobre a média dos últimos
+5 anos, validados pelo gate do [ADR 0006](../decisoes/0006-tiers-de-comparacao-por-clusterizacao.md):
+dispersão de escala intra-tier de 1,005 contra 2,982 na base inteira (redução de
+66%), concordância total com Ward e rótulos agronomicamente coerentes.
+
+Grupos: **grande escala industrial** (SP, GO, MG, MS, PR, MT, AL, PE),
+**média escala** (PB, BA, RN, ES, MA, TO, RJ, SE, PA, PI, CE, RS, AM, SC) e
+**pequena/marginal** (RO, DF, AC, AP, RR). Com a coluna real na gold, a etapa de
+Power Query mantém `tier` ao importar e a medida "Desvio vs grupo" passa a ter
+pares válidos por `dim_territorio[tier]` — nenhuma alteração no `.pbix` foi
+necessária, apenas a regeneração da gold.

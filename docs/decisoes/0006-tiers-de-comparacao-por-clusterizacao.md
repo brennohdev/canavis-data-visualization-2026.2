@@ -1,6 +1,6 @@
 # 0006 — Tiers de comparação por clusterização
 
-**Status:** Proposta (ainda não implementada nem validada com os dados)
+**Status:** Aceita (implementada e validada com os dados reais da gold)
 **Origem:** discussão do grupo (Alex e Brenno)
 
 ## Contexto
@@ -26,26 +26,78 @@ comparar eficiência apenas dentro de cada grupo.
 outro (eficiência: produtividade, tendência, resiliência). Nunca clusterizar pela mesma
 variável que se vai comparar, sob pena de circularidade.
 
-Diretrizes de método, quando for implementado (provavelmente na Etapa 2):
+## Diagnóstico dos dados (27 UFs com produção, gold real)
 
-- Modelo simples e interpretável (K-means ou clusterização hierárquica), com variáveis
-  padronizadas.
-- Número de clusters decidido por métrica (silhueta / cotovelo) e sanidade agronômica, não por
-  gosto. Com 15–17 microrregiões ou 27 UFs, o teto realista é de 2 a 3 grupos.
-- Cada cluster precisa receber um rótulo em linguagem de negócio (ex.: "grande escala
-  industrial", "pequena escala de sequeiro"), senão não serve ao usuário.
-- Validação obrigatória: comprovar que a comparação de eficiência dentro do cluster é mais
-  justa (menor dispersão de escala) do que na base inteira.
+Antes de escolher o método, mediu-se a forma da distribuição de escala sobre a gold:
 
-## Escopo em aberto
+- **Escala unidimensional:** `quantidade_produzida_t` e `area_colhida_ha` têm correlação
+  1,000 (bruta) e 0,995 (em log). Os dois "eixos de escala" são na prática o mesmo eixo.
+- **Distribuição log-normal:** assimetria bruta 4,66; em `log1p`, −0,46 (quase simétrica no
+  log). A escala só é tratável no espaço logarítmico.
+- **Concentração extrema:** top 1 UF (SP) = 56,8%; top 3 = 77,1%; top 5 = 88,7% da produção.
+- **Gaps naturais no log(quantidade):** SP isolado no topo (gap 1,72) e uma fronteira
+  separando as pequenas (gap 1,55). Sugere 2–3 grupos naturais, coerente com o teto de "2 a 3
+  grupos" previsto para 27 UFs.
 
-A decidir na implementação: clusterizar microrregiões da PB, UFs do Brasil, ou os dois níveis.
-Recomendação inicial: começar pelas UFs, onde a distorção de escala é mais forte e os dados são
-completos, e só então replicar para microrregiões.
+## Decisão de método — cortes em log, NÃO K-means
+
+Descartou-se **K-means multivariado**. Com escala efetivamente unidimensional, distribuição
+log-normal e outliers (SP), o K-means cru produziria apenas um "ranking de porte" — exatamente
+o resultado frágil que o gate deste ADR manda descartar. Também se descartou usar **valor da
+produção** como critério de agrupamento: é nominal/monetário, tem correlação ~1 com a
+quantidade e seria circular (contaminado por preço).
+
+Método escolhido: **cortes em log(quantidade produzida) em 3 tiers**, sobre a média dos últimos
+5 anos de cada UF (estabiliza o ruído anual). Os cortes são os *natural breaks* de Fisher-Jenks
+— a partição que minimiza a variância intra-grupo do log —, resolvidos por programação dinâmica
+em `src/canavis/domain/tiers.py`. Em uma dimensão, essa solução coincide com os maiores gaps
+ordenados do log e com a clusterização hierárquica de Ward, o que torna o resultado
+reprodutível e defensável sem dependência de bibliotecas externas.
+
+O **valor da produção** entra apenas como variável descritiva (perfil por tier), nunca como
+critério de agrupamento, e não é materializado na gold.
+
+## Gate de validação (resultado)
+
+1. **Cobertura exata:** cada uma das 27 UFs recebe exatamente um tier; nenhuma nula, nenhuma
+   com dois. Municípios e microrregiões ficam com tier nulo (fora de escopo).
+2. **Dispersão de escala intra-tier < global:** desvio-padrão do log cai de **2,982** (base
+   inteira) para **1,005** dentro dos grupos — redução de **66%**. Comparar dentro do tier é
+   comprovadamente mais justo.
+3. **Concordância com Ward:** a clusterização hierárquica de Ward sobre o log padronizado
+   recupera exatamente os mesmos três grupos (concordância 100%), confirmando os cortes.
+4. **Sanidade agronômica:** os rótulos de negócio são coerentes — SP, MG, GO, MS e PR caem no
+   tier grande, como esperado.
+
+Gate **aprovado**. Não foi necessário degradar para o plano B (faixas por quartis).
+
+## Tiers resultantes
+
+Cortes nos dois maiores gaps interiores do log: entre Pernambuco e Paraíba (gap 0,95) e entre
+Santa Catarina e Rondônia (gap 1,55).
+
+- **Grande escala industrial** (8 UFs, 94,8% do valor da produção): São Paulo, Goiás, Minas
+  Gerais, Mato Grosso do Sul, Paraná, Mato Grosso, Alagoas, Pernambuco.
+- **Média escala** (14 UFs, 5,1% do valor): Paraíba, Bahia, Rio Grande do Norte, Espírito
+  Santo, Maranhão, Tocantins, Rio de Janeiro, Sergipe, Pará, Piauí, Ceará, Rio Grande do Sul,
+  Amazonas, Santa Catarina.
+- **Pequena/marginal** (5 UFs, ~0,0% do valor): Rondônia, Distrito Federal, Acre, Amapá,
+  Roraima.
+
+O perfil de valor por tier confirma a leitura de escala: a quase totalidade do valor monetário
+concentra-se no tier grande, sem ter sido usado para formar os grupos.
+
+## Escopo
+
+Apenas **UFs** nesta task. Microrregiões (só 16 com produção recente) ficam de fora: poucos
+pontos para clusterização defensável. A coluna `tier` é materializada em `dim_territorio` pela
+camada de build; municípios e microrregiões ficam com tier nulo, o que o modelo do Power BI já
+tolera (a etapa de Power Query mantém a coluna se existir e a medida "Desvio vs grupo" passa a
+ter como filtrar por `dim_territorio[tier]`).
 
 ## Situação
 
-Registrada como direção validada em conversa. Não entra na entrega da Etapa 1 (que trata de
-descoberta e enquadramento); pertence ao trabalho analítico da Etapa 2. Só passa a "Aceita"
-depois de provada com os dados — se a clusterização não sustentar grupos reais (silhueta fraca,
-grupos sem sentido agronômico), a proposta é descartada com evidência.
+Implementada na Etapa 2: módulo de domínio `src/canavis/domain/tiers.py` (funções puras), com
+integração no build (`_atribuir_tier` em `src/canavis/pipeline/build.py`) e testes em
+`tests/test_tiers.py` e `tests/test_build.py`. A regra de ouro foi respeitada: agrupa-se por
+escala (quantidade física) e compara-se por eficiência; o valor monetário fica só como perfil.

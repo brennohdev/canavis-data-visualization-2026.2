@@ -6,7 +6,7 @@ import pandas as pd
 
 from canavis import storage
 from canavis.config import load_settings
-from canavis.domain import indicators
+from canavis.domain import indicators, tiers
 from canavis.logging import get_logger
 from canavis.pipeline.industrial import construir_industria, construir_vendas
 from canavis.pipeline.temporal import enriquecer_serie
@@ -107,7 +107,7 @@ def construir_estrela(ibge: pd.DataFrame, referencia: pd.DataFrame) -> dict[str,
          "situacao_quantidade", "situacao_area"]
     ].sort_values(["nivel_territorial", "territorio_id", "ano_referencia"]).reset_index(drop=True)
 
-    territorio = _dim_territorio(ibge, referencia)
+    territorio = _atribuir_tier(_dim_territorio(ibge, referencia), fato)
     calendario = _dim_calendario(fato["ano_referencia"].min(), fato["ano_referencia"].max())
     fonte = pd.DataFrame([{
         "fonte_id": _FONTE_ID,
@@ -179,6 +179,24 @@ def _dim_territorio(ibge: pd.DataFrame, referencia: pd.DataFrame) -> pd.DataFram
     return dim.reset_index().drop(columns=["extracao"]).sort_values(
         ["nivel_territorial", "cod_local"]
     ).reset_index(drop=True)
+
+
+def _atribuir_tier(territorio: pd.DataFrame, fato: pd.DataFrame) -> pd.DataFrame:
+    """Materializa o tier de escala por UF na dimensão territorial.
+
+    Só o nível UF recebe tier (ADR 0006): a escala é agrupada por cortes em
+    log(quantidade produzida) sobre a média recente, nunca pelo valor monetário
+    da produção. Municípios e microrregiões ficam com tier nulo, tolerado pelo
+    modelo do Power BI.
+    """
+    ufs = fato[fato["nivel_territorial"] == "uf"]
+    quantidade = tiers.media_recente(
+        ufs["ano_referencia"], ufs["quantidade_produzida_t"], ufs["territorio_id"]
+    )
+    rotulos = tiers.classificar_tiers(quantidade)
+    territorio = territorio.copy()
+    territorio["tier"] = territorio["territorio_id"].map(rotulos).astype("string")
+    return territorio
 
 
 def _dim_calendario(ano_inicial: int, ano_final: int) -> pd.DataFrame:
