@@ -6,6 +6,17 @@ ROOT = Path(__file__).resolve().parents[1]
 FATOS = ["fato_producao", "fato_industria", "fato_vendas_etanol_uf", "fato_vendas_etanol_municipio"]
 
 
+def medidas_producao():
+    """Mantém a mesma regra de completude das agregações da gold."""
+    quantidade_completa = "IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t]))"
+    return [
+        ("Produtividade", "IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]) || ISBLANK(fato_producao[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))", "0.00"),
+        ("Participação regional", f"VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = {quantidade_completa} VAR Total = CALCULATE({quantidade_completa}, ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))", "0.00%"),
+        ("Desvio vs seleção", "VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%"),
+        ("Desvio vs grupo", "VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%"),
+    ]
+
+
 def medidas_adicionais(nome):
     if nome == "fato_producao":
         return [("Tendência histórica (t por ha)", "IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[tendencia_t_ha]))", "0.00"),
@@ -44,12 +55,7 @@ def main():
                 linhas += ["\t\t\tisKey", "\t\t\tformatString: yyyy-MM-dd"]
             linhas += [""]
         if nome == "fato_producao":
-            for medida, dax, formato in [
-                ("Produtividade", "IF(HASONEVALUE(dim_territorio[nivel_territorial]), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))", "0.00"),
-                ("Participação regional", "VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Total = CALCULATE(SUM(fato_producao[quantidade_produzida_t]), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel), DIVIDE(SUM(fato_producao[quantidade_produzida_t]), Total))", "0.00%"),
-                ("Desvio vs seleção", "VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN DIVIDE([Produtividade] - Referencia, Referencia)", "0.00%"),
-                ("Desvio vs grupo", "VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier), DIVIDE([Produtividade] - Referencia, Referencia))", "0.00%"),
-            ]:
+            for medida, dax, formato in medidas_producao():
                 linhas += [f"\t\tmeasure '{medida}' = {dax}", f"\t\t\tformatString: {formato}", ""]
         for medida, dax, formato in medidas_adicionais(nome):
             linhas += [f"\t\tmeasure '{medida}' = {dax}", f"\t\t\tformatString: {formato}", ""]
@@ -64,6 +70,11 @@ def main():
             relacao = f"fato_{dim}" if fato == "fato_producao" else f"{fato}_{dim}"
             linhas += [f"\trelationship {relacao}", f"\t\tfromColumn: {fato}.{chave}", f"\t\ttoColumn: {dim}.{chave}", "\t\tfromCardinality: many", "\t\ttoCardinality: one", "\t\tcrossFilteringBehavior: oneDirection", ""]
     (ROOT / "powerbi/modelo.tmdl").write_text("\n".join(linhas), encoding="utf-8")
+    # Correção incremental para PBIX já carregado: preserva tabelas e partições.
+    correcao = ["createOrReplace", "\tref table fato_producao"]
+    for medida, dax, formato in medidas_producao():
+        correcao += [f"\t\tmeasure '{medida}' = {dax}", f"\t\t\tformatString: {formato}", ""]
+    (ROOT / "powerbi/correcao-ausencias.tmdl").write_text("\n".join(correcao), encoding="utf-8")
 
 
 if __name__ == "__main__":
