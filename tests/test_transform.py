@@ -85,16 +85,25 @@ def test_cinco_microrregioes_canavieiras():
 
 def test_regiao_de_resolve_as_cinco_microrregioes():
     esperado = {
-        "Litoral Norte - PB": ("Mamanguape", "João Pessoa"),
+        "Litoral Norte - PB": (None, "João Pessoa"),
         "Litoral Sul - PB": ("João Pessoa", "João Pessoa"),
-        "Sapé - PB": ("João Pessoa", "João Pessoa"),
+        "Sapé - PB": (None, "João Pessoa"),
         "João Pessoa - PB": ("João Pessoa", "João Pessoa"),
-        "Brejo Paraibano - PB": ("Guarabira", "João Pessoa"),
+        "Brejo Paraibano - PB": (None, None),
     }
     for micro, (imediata, intermediaria) in esperado.items():
         regiao = territorio.regiao_de(micro)
         assert regiao["imediata"] == imediata
         assert regiao["intermediaria"] == intermediaria
+
+
+def test_regiao_de_preserva_relacao_multiplas_sem_inventar_chave():
+    litoral = territorio.regiao_de("Litoral Norte - PB")
+    assert litoral["cod_imediata"] is None
+    assert {codigo for codigo, _ in litoral["imediatas"]} == {"250001", "250003"}
+    brejo = territorio.regiao_de("Brejo Paraibano - PB")
+    assert brejo["cod_intermediaria"] is None
+    assert {codigo for codigo, _ in brejo["intermediarias"]} == {"2501", "2502"}
 
 
 def test_regiao_de_microrregiao_desconhecida_levanta():
