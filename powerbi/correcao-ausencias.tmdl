@@ -1,13 +1,17 @@
 createOrReplace
 	ref table fato_producao
+		/// Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico.
 		measure 'Produtividade' = IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]) || ISBLANK(fato_producao[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))
 			formatString: 0.00
 
+		/// Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel.
 		measure 'Participação regional' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t])) VAR Total = CALCULATE(IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t])), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))
 			formatString: 0.00%
 
+		/// Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel.
 		measure 'Desvio vs seleção' = VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
+		/// Desvio frente as UFs do mesmo tier (ADR 0006). Exclusiva do nivel UF; retorna vazio fora dele por construcao, nao e erro.
 		measure 'Desvio vs grupo' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%

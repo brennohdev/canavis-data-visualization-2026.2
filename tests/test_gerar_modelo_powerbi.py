@@ -58,6 +58,12 @@ def test_dim_territorio_sem_fallback_de_tier(modelo):
     assert "Table.AddColumn" not in modelo
 
 
-def test_doze_medidas_e_doze_relacoes(modelo):
-    assert modelo.count("measure '") == 12
+def test_dezessete_medidas_e_doze_relacoes(modelo):
+    assert modelo.count("measure '") == 17
     assert modelo.count("\trelationship ") == 12
+
+
+def test_descricoes_e_fatores_atr_presentes(modelo):
+    assert "/// " in modelo
+    for fator in ("1.0495", "1.7651", "1.6913"):
+        assert fator in modelo

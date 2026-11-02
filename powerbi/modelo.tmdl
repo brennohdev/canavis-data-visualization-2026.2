@@ -86,15 +86,19 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: quebra_confirmada
 
+		/// Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico.
 		measure 'Produtividade' = IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]) || ISBLANK(fato_producao[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))
 			formatString: 0.00
 
+		/// Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel.
 		measure 'Participação regional' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t])) VAR Total = CALCULATE(IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t])), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))
 			formatString: 0.00%
 
+		/// Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel.
 		measure 'Desvio vs seleção' = VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
+		/// Desvio frente as UFs do mesmo tier (ADR 0006). Exclusiva do nivel UF; retorna vazio fora dele por construcao, nao e erro.
 		measure 'Desvio vs grupo' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
@@ -207,6 +211,25 @@ createOrReplace
 		measure 'ATR ponderado (kg por t)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && COUNTROWS(FILTER(fato_industria, ISBLANK(fato_industria[atr_kg_t]) || ISBLANK(fato_industria[cana_mil_t]))) = 0, DIVIDE(SUMX(fato_industria, fato_industria[atr_kg_t] * fato_industria[cana_mil_t]), SUM(fato_industria[cana_mil_t])))
 			formatString: 0.00
 
+		/// ATR-equivalente do acucar produzido (kg). Premissa CONSECANA: acucar branco 1,0495 kg ATR/kg (CONAB generico; VHP 1,0453 e alternativa a confirmar). Exclusiva do nivel UF.
+		measure 'ATR equivalente açúcar (kg)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && NOT ISBLANK(SUM(fato_industria[producao_acucar_mil_t])), SUM(fato_industria[producao_acucar_mil_t]) * 1000000 * 1.0495)
+			formatString: #,0
+
+		/// ATR-equivalente do etanol produzido (kg), anidro (1,7651) e hidratado (1,6913) somados SEPARADAMENTE, nunca pelo total. Exclusiva do nivel UF.
+		measure 'ATR equivalente etanol (kg)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "uf" && NOT ISBLANK(SUM(fato_industria[producao_etanol_anidro_mil_l])) && NOT ISBLANK(SUM(fato_industria[producao_etanol_hidratado_mil_l])), SUM(fato_industria[producao_etanol_anidro_mil_l]) * 1000 * 1.7651 + SUM(fato_industria[producao_etanol_hidratado_mil_l]) * 1000 * 1.6913)
+			formatString: #,0
+
+		/// Fatia do acucar no ATR total (ATR acucar / ATR total). DIVIDE protegido; denominador 0/nulo retorna BLANK, nunca 0% nem 50/50. Exclusiva do nivel UF.
+		measure 'Share açúcar (ATR)' = VAR AtrAcucar = [ATR equivalente açúcar (kg)] VAR AtrEtanol = [ATR equivalente etanol (kg)] VAR AtrTotal = AtrAcucar + AtrEtanol RETURN IF(NOT ISBLANK(AtrAcucar) && NOT ISBLANK(AtrEtanol) && AtrTotal > 0, DIVIDE(AtrAcucar, AtrTotal))
+			formatString: 0.00%
+
+		/// Fatia do etanol no ATR total (ATR etanol / ATR total). DIVIDE protegido; denominador 0/nulo retorna BLANK, nunca 0% nem 50/50. Exclusiva do nivel UF.
+		measure 'Share etanol (ATR)' = VAR AtrAcucar = [ATR equivalente açúcar (kg)] VAR AtrEtanol = [ATR equivalente etanol (kg)] VAR AtrTotal = AtrAcucar + AtrEtanol RETURN IF(NOT ISBLANK(AtrAcucar) && NOT ISBLANK(AtrEtanol) && AtrTotal > 0, DIVIDE(AtrEtanol, AtrTotal))
+			formatString: 0.00%
+
+		/// Rotulo textual de cobertura: distingue 'sem dado' (cinza/hachura no visual) de 'mix real' (fatia zero legitima) e 'presente'. Medida textual, sem formatString numerico. Exclusiva do nivel UF.
+		measure 'Situação mix (UF/safra)' = VAR Cana = SUM(fato_industria[cana_mil_t]) VAR Acucar = SUM(fato_industria[producao_acucar_mil_t]) VAR Etanol = SUM(fato_industria[producao_etanol_total_mil_l]) RETURN SWITCH(TRUE(), ISBLANK(Cana) || Cana = 0, "sem dado", ISBLANK(Acucar) || ISBLANK(Etanol), "sem dado", (Acucar = 0 || Etanol = 0), "mix real", "presente")
+
 		partition fato_industria = m
 			mode: import
 			source =
@@ -312,6 +335,7 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: vendas_etanol_hidratado_l
 
+		/// Vendas de etanol hidratado (L). A versao municipal so e confiavel dentro da PB (chave conferida).
 		measure 'Vendas etanol municípios validados (L)' = IF(SELECTEDVALUE(dim_territorio[nivel_territorial]) = "municipio", SUM(fato_vendas_etanol_municipio[vendas_etanol_hidratado_l]))
 			formatString: #,0
 
