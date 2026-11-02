@@ -17,3 +17,4 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0009](0009-serie-temporal-quebra-regime.md) | Decomposição histórica e limite da evidência de quebra | Aceita |
 | [0010](0010-fontes-internacionais-preco-cambio.md) | Fontes internacionais de preço, câmbio e balanço por país (direção Etapa 3) | Aceita |
 | [0011](0011-metodologias-de-quebra-estrutural.md) | Metodologias de quebra estrutural: confirmação endógena e manutenção do gate (Task 10, Etapa 2) | Aceita |
+| [0012](0012-reestruturacao-gold-por-nivel.md) | Reestruturação da gold de produção em fatos por nível territorial | Aceita |

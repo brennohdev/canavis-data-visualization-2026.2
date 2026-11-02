@@ -10,6 +10,33 @@ ADR 0008 (tratamento Etapa 2 — zero ≠ ausente)
 
 ---
 
+> **Atualização de 02/11/2026 — Blocos A, B e C APLICADOS.** As propostas
+> deste relatório deixaram de ser apenas sugestão: os três blocos foram
+> aplicados ao modelo gerado. Isto **substitui** a "Regra de ouro: não
+> aplicado" da abertura abaixo (que vale como registro do estado durante o
+> diagnóstico). O que mudou:
+>
+> - **Bloco A (descrições, DAX intocado):** as 5 medidas de produção/vendas
+>   (Produtividade, Participação regional, Desvio vs seleção, Desvio vs grupo e
+>   Vendas etanol municípios validados) ganharam linhas de descrição `///` no
+>   TMDL, explicando leitura e escopo. **Nenhuma string DAX nem `formatString`
+>   foi alterada.**
+> - **Bloco B (volume/mix em ATR):** 5 medidas novas em `fato_industria`
+>   (`ATR equivalente açúcar (kg)`, `ATR equivalente etanol (kg)`,
+>   `Share açúcar (ATR)`, `Share etanol (ATR)` e `Situação mix (UF/safra)`),
+>   dando a visão de composição/volume proposta na tabela-resumo.
+> - **Bloco C (gold por nível):** materializados `fato_producao_uf`,
+>   `fato_producao_microrregiao` e `fato_producao_municipio` (Opção A),
+>   **mantendo** o `fato_producao` empilhado por retrocompatibilidade.
+>
+> Como aplicar e detalhar: ver
+> [design-reestruturacao-gold.md](design-reestruturacao-gold.md) e o
+> [ADR 0012](../decisoes/0012-reestruturacao-gold-por-nivel.md). O corpo
+> analítico abaixo permanece como registro do diagnóstico que fundamentou essas
+> decisões.
+
+---
+
 ## Escopo e regra desta rodada (leia primeiro)
 
 Esta rodada é **analítica**: auditar, reproduzir, diagnosticar, documentar e **propor**. Nada aqui
