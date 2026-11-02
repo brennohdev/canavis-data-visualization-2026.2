@@ -110,7 +110,7 @@ createOrReplace
 		partition fato_producao = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_producao.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_producao.parquet"))
 
 	table fato_industria
 		column territorio_id
@@ -210,7 +210,7 @@ createOrReplace
 		partition fato_industria = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_industria.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_industria.parquet"))
 
 	table fato_vendas_etanol_uf
 		column territorio_id
@@ -254,7 +254,7 @@ createOrReplace
 		partition fato_vendas_etanol_uf = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_vendas_etanol_uf.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_vendas_etanol_uf.parquet"))
 
 	table fato_vendas_etanol_municipio
 		column uf_id
@@ -318,7 +318,7 @@ createOrReplace
 		partition fato_vendas_etanol_municipio = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\fato_vendas_etanol_municipio.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_vendas_etanol_municipio.parquet"))
 
 	table dim_territorio
 		column territorio_id
@@ -389,7 +389,7 @@ createOrReplace
 		partition dim_territorio = m
 			mode: import
 			source =
-				let Fonte = Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_territorio.parquet")) in if Table.HasColumns(Fonte, "tier") then Fonte else Table.AddColumn(Fonte, "tier", each null, type text)
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/dim_territorio.parquet"))
 
 	table dim_calendario
 		dataCategory: Time
@@ -423,7 +423,7 @@ createOrReplace
 		partition dim_calendario = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_calendario.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/dim_calendario.parquet"))
 
 	table dim_fonte
 		column fonte_id
@@ -464,7 +464,7 @@ createOrReplace
 		partition dim_fonte = m
 			mode: import
 			source =
-				Parquet.Document(File.Contents("C:\Users\Gustavo\Documents\visualização de dados\canavis-data-visualization-2026.2\data\processed\dim_fonte.parquet"))
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/dim_fonte.parquet"))
 
 	relationship fato_dim_territorio
 		fromColumn: fato_producao.territorio_id
