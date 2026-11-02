@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 
 import pandas as pd
 
 from canavis.domain.features import intensidade_industrial
 from canavis.domain.indicators import mix_etanol_acucar
+from canavis.domain.texto import chave_nome
 
 COD_UF = dict(zip(
     "RO AC AM RR PA AP TO MA PI CE RN PB PE AL SE BA MG ES RJ SP PR SC RS MS MT GO DF".split(),
@@ -63,8 +63,8 @@ def _chave_uf(ufs: pd.Series) -> pd.Series:
 
 
 def _nome(valor: str) -> str:
-    texto = unicodedata.normalize("NFKD", str(valor).split(" - ")[0])
-    return re.sub(r"[^A-Z0-9]", "", texto.encode("ascii", "ignore").decode().upper())
+    """Forma canônica para casar nomes de município (sem o sufixo ' - UF')."""
+    return chave_nome(str(valor).split(" - ")[0])
 
 
 def construir_vendas(anp: pd.DataFrame, territorios: pd.DataFrame) -> dict[str, pd.DataFrame]:
@@ -86,6 +86,13 @@ def construir_vendas(anp: pd.DataFrame, territorios: pd.DataFrame) -> dict[str, 
     nomes = frame["codigo_municipio_origem"].map(pb["nome_territorio"].map(_nome))
     valida = frame["uf"].eq("PB") & nomes.notna() & nomes.eq(frame["nome_municipio_origem"].map(_nome))
     frame["territorio_id"] = ("municipio:" + frame["codigo_municipio_origem"]).where(valida)
+    # Padroniza o nome de exibição: para municípios validados usa o nome
+    # canônico do IBGE (Title Case com acento, ex. "Água Branca - PB"); para os
+    # demais, ao menos uniformiza a caixa do MAIÚSCULO cru da ANP em Title Case.
+    nome_ibge = frame["codigo_municipio_origem"].map(pb["nome_territorio"])
+    frame["nome_municipio_origem"] = (
+        nome_ibge.where(valida, frame["nome_municipio_origem"].str.title()).astype("string")
+    )
     frame["status_chave"] = "nao_validada_fora_pb"
     frame.loc[frame["uf"].eq("PB"), "status_chave"] = "divergente_ou_sem_correspondencia"
     frame.loc[valida, "status_chave"] = "codigo_nome_conferidos_pb"

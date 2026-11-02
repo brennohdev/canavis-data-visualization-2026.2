@@ -6,7 +6,7 @@ import pandas as pd
 
 from canavis import storage
 from canavis.config import load_settings
-from canavis.domain import indicators, tiers
+from canavis.domain import indicators, texto, tiers
 from canavis.logging import get_logger
 from canavis.pipeline.industrial import construir_industria, construir_vendas
 from canavis.pipeline.temporal import enriquecer_serie
@@ -202,6 +202,14 @@ def _dim_territorio(ibge: pd.DataFrame, referencia: pd.DataFrame) -> pd.DataFram
     dim.loc[dim["nivel_territorial"] == "microrregiao", "mapeamento_regiao_2017"] = "unico_ibge"
     dim.loc[(dim["nivel_territorial"] == "microrregiao") &
             dim["cod_regiao_imediata"].isna(), "mapeamento_regiao_2017"] = "multiplas_regioes"
+    # Forma canônica sem acento ao lado de cada nome de exibição: padroniza
+    # busca/ordenação/junção sem descartar o acento do rótulo original.
+    for origem, destino in [
+        ("nome_territorio", "nome_territorio_sem_acento"),
+        ("nome_regiao_imediata", "nome_regiao_imediata_sem_acento"),
+        ("nome_regiao_intermediaria", "nome_regiao_intermediaria_sem_acento"),
+    ]:
+        dim[destino] = texto.sem_acento_series(dim[origem])
     return dim.reset_index().drop(columns=["extracao"]).sort_values(
         ["nivel_territorial", "cod_local"]
     ).reset_index(drop=True)

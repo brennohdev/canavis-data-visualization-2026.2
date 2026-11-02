@@ -701,6 +701,21 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: mapeamento_regiao_2017
 
+		column nome_territorio_sem_acento
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_territorio_sem_acento
+
+		column nome_regiao_imediata_sem_acento
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_imediata_sem_acento
+
+		column nome_regiao_intermediaria_sem_acento
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nome_regiao_intermediaria_sem_acento
+
 		column tier
 			dataType: string
 			summarizeBy: none
