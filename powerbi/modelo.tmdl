@@ -202,6 +202,31 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: quebra_confirmada
 
+		/// Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico.
+		measure 'Produtividade (UF)' = IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao_uf, ISBLANK(fato_producao_uf[quantidade_produzida_t]) || ISBLANK(fato_producao_uf[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao_uf[quantidade_produzida_t]), SUM(fato_producao_uf[area_colhida_ha])))
+			formatString: 0.00
+
+		/// Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel.
+		measure 'Participação regional (UF)' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = IF(COUNTROWS(FILTER(fato_producao_uf, ISBLANK(fato_producao_uf[quantidade_produzida_t]))) = 0, SUM(fato_producao_uf[quantidade_produzida_t])) VAR Total = CALCULATE(IF(COUNTROWS(FILTER(fato_producao_uf, ISBLANK(fato_producao_uf[quantidade_produzida_t]))) = 0, SUM(fato_producao_uf[quantidade_produzida_t])), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))
+			formatString: 0.00%
+
+		/// Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel.
+		measure 'Desvio vs seleção (UF)' = VAR Atual = [Produtividade (UF)] VAR Referencia = CALCULATE([Produtividade (UF)], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
+			formatString: 0.00%
+
+		/// Desvio frente as UFs do mesmo tier (ADR 0006). Exclusiva do nivel UF; retorna vazio fora dele por construcao, nao e erro.
+		measure 'Desvio vs grupo (UF)' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade (UF)] VAR Referencia = CALCULATE([Produtividade (UF)], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
+			formatString: 0.00%
+
+		measure 'Tendência histórica (t por ha) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_uf[tendencia_t_ha]))
+			formatString: 0.00
+
+		measure 'Oscilação histórica (t por ha) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_uf[oscilacao_t_ha]))
+			formatString: 0.00
+
+		measure 'P Chow exploratório (2003-2023) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]), MAX(fato_producao_uf[p_chow]))
+			formatString: 0.000000
+
 		partition fato_producao_uf = m
 			mode: import
 			source =
@@ -293,6 +318,27 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: quebra_confirmada
 
+		/// Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico.
+		measure 'Produtividade (microrregião)' = IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao_microrregiao, ISBLANK(fato_producao_microrregiao[quantidade_produzida_t]) || ISBLANK(fato_producao_microrregiao[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao_microrregiao[quantidade_produzida_t]), SUM(fato_producao_microrregiao[area_colhida_ha])))
+			formatString: 0.00
+
+		/// Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel.
+		measure 'Participação regional (microrregião)' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = IF(COUNTROWS(FILTER(fato_producao_microrregiao, ISBLANK(fato_producao_microrregiao[quantidade_produzida_t]))) = 0, SUM(fato_producao_microrregiao[quantidade_produzida_t])) VAR Total = CALCULATE(IF(COUNTROWS(FILTER(fato_producao_microrregiao, ISBLANK(fato_producao_microrregiao[quantidade_produzida_t]))) = 0, SUM(fato_producao_microrregiao[quantidade_produzida_t])), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))
+			formatString: 0.00%
+
+		/// Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel.
+		measure 'Desvio vs seleção (microrregião)' = VAR Atual = [Produtividade (microrregião)] VAR Referencia = CALCULATE([Produtividade (microrregião)], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
+			formatString: 0.00%
+
+		measure 'Tendência histórica (t por ha) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_microrregiao[tendencia_t_ha]))
+			formatString: 0.00
+
+		measure 'Oscilação histórica (t por ha) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_microrregiao[oscilacao_t_ha]))
+			formatString: 0.00
+
+		measure 'P Chow exploratório (2003-2023) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]), MAX(fato_producao_microrregiao[p_chow]))
+			formatString: 0.000000
+
 		partition fato_producao_microrregiao = m
 			mode: import
 			source =
@@ -348,6 +394,18 @@ createOrReplace
 			dataType: string
 			summarizeBy: none
 			sourceColumn: situacao_area
+
+		/// Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico.
+		measure 'Produtividade (município)' = IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao_municipio, ISBLANK(fato_producao_municipio[quantidade_produzida_t]) || ISBLANK(fato_producao_municipio[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao_municipio[quantidade_produzida_t]), SUM(fato_producao_municipio[area_colhida_ha])))
+			formatString: 0.00
+
+		/// Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel.
+		measure 'Participação regional (município)' = VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = IF(COUNTROWS(FILTER(fato_producao_municipio, ISBLANK(fato_producao_municipio[quantidade_produzida_t]))) = 0, SUM(fato_producao_municipio[quantidade_produzida_t])) VAR Total = CALCULATE(IF(COUNTROWS(FILTER(fato_producao_municipio, ISBLANK(fato_producao_municipio[quantidade_produzida_t]))) = 0, SUM(fato_producao_municipio[quantidade_produzida_t])), ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))
+			formatString: 0.00%
+
+		/// Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel.
+		measure 'Desvio vs seleção (município)' = VAR Atual = [Produtividade (município)] VAR Referencia = CALCULATE([Produtividade (município)], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
+			formatString: 0.00%
 
 		partition fato_producao_municipio = m
 			mode: import

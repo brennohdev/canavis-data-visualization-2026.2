@@ -61,9 +61,34 @@ def test_dim_territorio_sem_fallback_de_tier(modelo):
     assert "Table.AddColumn" not in modelo
 
 
-def test_dezessete_medidas_e_vinte_e_uma_relacoes(modelo):
-    assert modelo.count("measure '") == 17
+def test_contagem_de_medidas_e_relacoes(modelo):
+    # 33 medidas = 7 no fato_producao empilhado (retrocompat)
+    #            + 7 (UF) + 6 (microrregião, sem Desvio vs grupo)
+    #            + 3 (município: Produtividade, Participação, Desvio vs seleção)
+    #            + 6 em fato_industria (3 razões + 3 ATR: equiv. açúcar/etanol, shares)
+    #              na verdade: 3 razões + 2 ATR-equiv + 2 shares + 1 Situação mix = 8
+    #            + 1 Vendas UF + 1 Vendas município.
+    # 7+7+6+3+8+1+1 = 33.
+    assert modelo.count("measure '") == 33
+    # 21 relações = 7 fatos x 3 dimensões (territorio, calendario, fonte).
     assert modelo.count("\trelationship ") == 21
+
+
+def test_medidas_cabiveis_por_granularidade(modelo):
+    # Desvio vs grupo depende de tier: só UF (e o empilhado), nunca micro/município.
+    assert "measure 'Desvio vs grupo (UF)'" in modelo
+    assert "measure 'Desvio vs grupo (microrregião)'" not in modelo
+    assert "measure 'Desvio vs grupo (município)'" not in modelo
+    # Série temporal: UF e microrregião, nunca município (sem colunas temporais).
+    assert "measure 'Tendência histórica (t por ha) (microrregião)'" in modelo
+    assert "measure 'Tendência histórica (t por ha) (município)'" not in modelo
+    assert "measure 'P Chow exploratório (2003-2023) (município)'" not in modelo
+    # Produtividade existe nos três níveis, lendo o próprio fato.
+    for sufixo, fato in [("(UF)", "fato_producao_uf"),
+                         ("(microrregião)", "fato_producao_microrregiao"),
+                         ("(município)", "fato_producao_municipio")]:
+        assert f"measure 'Produtividade {sufixo}'" in modelo
+        assert f"SUM({fato}[quantidade_produzida_t])" in modelo
 
 
 _COLUNAS_TEMPORAIS = [

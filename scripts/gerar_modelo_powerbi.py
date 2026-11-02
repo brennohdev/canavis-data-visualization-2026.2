@@ -17,26 +17,54 @@ FATOS = [
 URL_BASE = "https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed"
 
 
-def medidas_producao():
-    """Mantém a mesma regra de completude das agregações da gold.
+# Rótulo legível de cada nível, usado para qualificar os nomes das medidas
+# (nomes de medida precisam ser únicos no modelo do Power BI).
+_SUFIXO_NIVEL = {
+    "fato_producao": "",
+    "fato_producao_uf": " (UF)",
+    "fato_producao_microrregiao": " (microrregião)",
+    "fato_producao_municipio": " (município)",
+}
 
-    Cada tupla é (label, dax, formato, descricao). A descricao, quando
-    presente, vira uma linha '/// <descricao>' antes da medida no TMDL.
+
+def medidas_producao(fato="fato_producao"):
+    """Medidas de produção CABÍVEIS no fato indicado, lendo o próprio fato.
+
+    Cada granularidade recebe só as medidas que o seu dado sustenta:
+    - UF: todas (inclui Desvio vs grupo, que depende de tier — só existe em UF).
+    - microrregião: tudo menos Desvio vs grupo (sem tier; ADR 0006).
+    - município: só Produtividade, Participação e Desvio vs seleção (sem tier
+      e sem série temporal — 62% de supressão impede; ADR 0004/0009).
+    - fato_producao (empilhado): todas, mantidas por retrocompatibilidade.
+
+    Cada tupla é (label, dax, formato, descricao). O label é sufixado pelo nível
+    (exceto no empilhado), porque o Power BI exige nomes de medida únicos. O DAX
+    referencia `fato` (o próprio fato do nível), eliminando a dependência do
+    filtro manual de nível: a medida já lê o grão certo.
     """
-    quantidade_completa = "IF(COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]))) = 0, SUM(fato_producao[quantidade_produzida_t]))"
-    return [
-        ("Produtividade", "IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER(fato_producao, ISBLANK(fato_producao[quantidade_produzida_t]) || ISBLANK(fato_producao[area_colhida_ha]))) = 0, DIVIDE(SUM(fato_producao[quantidade_produzida_t]), SUM(fato_producao[area_colhida_ha])))", "0.00", "Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico."),
-        ("Participação regional", f"VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = {quantidade_completa} VAR Total = CALCULATE({quantidade_completa}, ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))", "0.00%", "Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel."),
-        ("Desvio vs seleção", "VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%", "Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel."),
-        ("Desvio vs grupo", "VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%", "Desvio frente as UFs do mesmo tier (ADR 0006). Exclusiva do nivel UF; retorna vazio fora dele por construcao, nao e erro."),
+    sufixo = _SUFIXO_NIVEL[fato]
+    quantidade_completa = f"IF(COUNTROWS(FILTER({fato}, ISBLANK({fato}[quantidade_produzida_t]))) = 0, SUM({fato}[quantidade_produzida_t]))"
+    produtividade = f"[Produtividade{sufixo}]"
+    medidas = [
+        (f"Produtividade{sufixo}", f"IF(HASONEVALUE(dim_territorio[nivel_territorial]) && COUNTROWS(FILTER({fato}, ISBLANK({fato}[quantidade_produzida_t]) || ISBLANK({fato}[area_colhida_ha]))) = 0, DIVIDE(SUM({fato}[quantidade_produzida_t]), SUM({fato}[area_colhida_ha])))", "0.00", "Rendimento medio ponderado pela area (razao de agregados: soma da quantidade / soma da area), nao a media simples das produtividades. Exige nivel unico."),
+        (f"Participação regional{sufixo}", f"VAR Nivel = SELECTEDVALUE(dim_territorio[nivel_territorial]) VAR Quantidade = {quantidade_completa} VAR Total = CALCULATE({quantidade_completa}, ALL(dim_territorio), dim_territorio[nivel_territorial] = Nivel) RETURN IF(NOT ISBLANK(Nivel) && NOT ISBLANK(Quantidade), DIVIDE(Quantidade, Total))", "0.00%", "Participacao do territorio no total do SEU nivel (denominador por nivel). So e valida com nivel fixado; nunca em ranking multinivel."),
+        (f"Desvio vs seleção{sufixo}", f"VAR Atual = {produtividade} VAR Referencia = CALCULATE({produtividade}, ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%", "Desvio percentual da produtividade frente a referencia = a selecao visivel no visual (nao o Brasil, nao uma media fixa). Fixar nivel."),
     ]
+    # Desvio vs grupo só é cabível onde há tier: nível UF (e o empilhado, por
+    # retrocompatibilidade). Microrregião e município não têm tier (ADR 0006).
+    if fato in ("fato_producao", "fato_producao_uf"):
+        medidas.append((f"Desvio vs grupo{sufixo}", f"VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = {produtividade} VAR Referencia = CALCULATE({produtividade}, ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))", "0.00%", "Desvio frente as UFs do mesmo tier (ADR 0006). Exclusiva do nivel UF; retorna vazio fora dele por construcao, nao e erro."))
+    return medidas
 
 
 def medidas_adicionais(nome):
-    if nome == "fato_producao":
-        return [("Tendência histórica (t por ha)", "IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[tendencia_t_ha]))", "0.00", None),
-                ("Oscilação histórica (t por ha)", "IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[oscilacao_t_ha]))", "0.00", None),
-                ("P Chow exploratório (2003-2023)", "IF(HASONEVALUE(dim_territorio[territorio_id]), MAX(fato_producao[p_chow]))", "0.000000", None)]
+    # Medidas temporais: cabíveis onde há série (UF, microrregião e o empilhado).
+    # Município não entra — não tem colunas temporais (62% de supressão).
+    if nome in ("fato_producao", "fato_producao_uf", "fato_producao_microrregiao"):
+        sufixo = _SUFIXO_NIVEL[nome]
+        return [(f"Tendência histórica (t por ha){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX({nome}[tendencia_t_ha]))", "0.00", None),
+                (f"Oscilação histórica (t por ha){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX({nome}[oscilacao_t_ha]))", "0.00", None),
+                (f"P Chow exploratório (2003-2023){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]), MAX({nome}[p_chow]))", "0.000000", None)]
     if nome == "fato_industria":
         medidas = []
         for label, numerador, denominador in [
@@ -93,8 +121,8 @@ def main():
             if coluna == "data_referencia" and nome == "dim_calendario":
                 linhas += ["\t\t\tisKey", "\t\t\tformatString: yyyy-MM-dd"]
             linhas += [""]
-        if nome == "fato_producao":
-            for medida, dax, formato, descricao in medidas_producao():
+        if nome in _SUFIXO_NIVEL:
+            for medida, dax, formato, descricao in medidas_producao(nome):
                 linhas += _emitir_medida(medida, dax, formato, descricao)
         for medida, dax, formato, descricao in medidas_adicionais(nome):
             linhas += _emitir_medida(medida, dax, formato, descricao)
