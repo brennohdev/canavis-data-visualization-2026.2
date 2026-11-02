@@ -14,4 +14,6 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0006](0006-tiers-de-comparacao-por-clusterizacao.md) | Tiers de comparação por clusterização (agrupar por escala, comparar por eficiência) | Proposta |
 | [0007](0007-chuva-para-resiliencia-climatica.md) | Ancorar resiliência climática em dados de chuva (3 fontes testadas) | Rejeitada |
 | [0008](0008-tratamento-etapa2.md) | Tratamento Etapa 2: classificação de ausência, defasagem da PAM e de-para territorial | Aceita |
-| [0009](0009-serie-temporal-quebra-regime.md) | Decomposição histórica e teste exploratório de mudança de regime | Aceita |
+| [0009](0009-serie-temporal-quebra-regime.md) | Decomposição histórica e limite da evidência de quebra | Aceita |
+| [0010](0010-fontes-internacionais-preco-cambio.md) | Fontes internacionais de preço, câmbio e balanço por país (direção Etapa 3) | Aceita |
+| [0011](0011-metodologias-de-quebra-estrutural.md) | Metodologias de quebra estrutural: confirmação endógena e manutenção do gate (Task 10, Etapa 2) | Aceita |
