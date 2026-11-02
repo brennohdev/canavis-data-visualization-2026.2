@@ -177,6 +177,20 @@ def test_separar_por_nivel_municipio_sem_colunas_temporais():
             assert coluna in colunas
 
 
+def test_dim_territorio_tem_nome_sem_acento_preservando_original():
+    dim = construir_estrela(*_dados_com_ufs())["dim_territorio"].set_index("territorio_id")
+    # Coluna canônica criada ao lado do nome de exibição (não o substitui).
+    assert "nome_territorio_sem_acento" in dim.columns
+    assert dim.loc["uf:35", "nome_territorio"] == "São Paulo"
+    assert dim.loc["uf:35", "nome_territorio_sem_acento"] == "Sao Paulo"
+    assert dim.loc["uf:52", "nome_territorio_sem_acento"] == "Goias"
+    # Nomes sem acento ficam inalterados na forma canônica.
+    assert dim.loc["uf:14", "nome_territorio_sem_acento"] == "Roraima"
+    # As regiões também ganham forma canônica.
+    assert "nome_regiao_imediata_sem_acento" in dim.columns
+    assert "nome_regiao_intermediaria_sem_acento" in dim.columns
+
+
 @pytest.mark.parametrize("formato", ["parquet", "csv", "xlsx"])
 def test_formatos_de_exportacao_preservam_nulo_e_zero(tmp_path, monkeypatch, formato):
     from types import SimpleNamespace
