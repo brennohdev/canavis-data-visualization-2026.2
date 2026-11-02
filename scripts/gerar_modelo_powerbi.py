@@ -4,6 +4,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 FATOS = ["fato_producao", "fato_industria", "fato_vendas_etanol_uf", "fato_vendas_etanol_municipio"]
+# Base da URL raw do GitHub para os Parquet da gold. Trocar de branch (main -> SHA)
+# ou de repositório é uma edição de uma linha aqui.
+URL_BASE = "https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed"
 
 
 def medidas_producao():
@@ -59,10 +62,8 @@ def main():
                 linhas += [f"\t\tmeasure '{medida}' = {dax}", f"\t\t\tformatString: {formato}", ""]
         for medida, dax, formato in medidas_adicionais(nome):
             linhas += [f"\t\tmeasure '{medida}' = {dax}", f"\t\t\tformatString: {formato}", ""]
-        arquivo = str(ROOT / "data/processed" / f"{nome}.parquet")
-        m = f'Parquet.Document(File.Contents("{arquivo}"))'
-        if nome == "dim_territorio":
-            m = f'let Fonte = {m} in if Table.HasColumns(Fonte, "tier") then Fonte else Table.AddColumn(Fonte, "tier", each null, type text)'
+        url = f"{URL_BASE}/{nome}.parquet"
+        m = f'Parquet.Document(Web.Contents("{url}"))'
         linhas += [f"\t\tpartition {nome} = m", "\t\t\tmode: import", "\t\t\tsource =", f'\t\t\t\t{m}', ""]
     for fato in FATOS:
         for dim, chave in [("dim_territorio", "territorio_id"), ("dim_calendario", "data_referencia"), ("dim_fonte", "fonte_id")]:

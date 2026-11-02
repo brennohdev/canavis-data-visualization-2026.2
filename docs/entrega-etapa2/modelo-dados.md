@@ -2,13 +2,17 @@
 
 ## Importação e Power Query
 
-As sete tabelas vêm dos Parquets de `data/processed`. O script reproduzível `powerbi/modelo.tmdl` define as consultas M, tipos, relações e medidas. Execute `uv run python scripts/gerar_modelo_powerbi.py` para ajustar os caminhos à pasta local antes de aplicar o script na exibição TMDL do Power BI. Após aplicar, atualize **todas** as tabelas: aplicar TMDL altera os metadados, não garante a atualização dos dados importados.
+As sete tabelas vêm dos Parquets de `data/processed`, **lidos por URL raw do GitHub** (`Web.Contents`). O script reproduzível `powerbi/modelo.tmdl` define as consultas M, tipos, relações e medidas. Execute `uv run python scripts/gerar_modelo_powerbi.py` para regenerar o `.tmdl`. Como a fonte agora é a URL raw do GitHub, o `.tmdl` é **portável**: não há caminho de máquina para ajustar e todos os integrantes do grupo aplicam o mesmo arquivo. No Power BI basta aplicar o TMDL na exibição correspondente e dar **Refresh** (ou importar via **Obter Dados → Web** com a URL). Após aplicar, atualize **todas** as tabelas: aplicar TMDL altera os metadados, não garante a atualização dos dados importados.
+
+A URL base usada é `https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed`, configurável em uma linha no topo de `scripts/gerar_modelo_powerbi.py` (constante `URL_BASE`) para trocar de branch (`main` → um SHA) ou de repositório. Cada tabela é lida de `{URL_BASE}/<nome>.parquet`.
+
+Observação sobre a entrega final (zip): o roteiro exige "base de dados tratada". A URL raw conta como origem documentada, mas inclua também os arquivos Parquet de `data/processed` no pacote — é mais seguro do que depender apenas da disponibilidade da URL no momento da avaliação.
 
 | Etapa | O que faz | Por que / decisão |
 | --- | --- | --- |
-| File.Contents | Lê o Parquet local da gold | O tratamento e os cálculos de origem permanecem no pipeline |
+| Web.Contents | Lê o Parquet da gold pela URL raw do GitHub | `.tmdl` portável, sem caminho de máquina; mesmo arquivo para todo o grupo |
 | Parquet.Document | Importa a tabela com os tipos publicados | Preserva nulos e zeros reais sem conversão textual |
-| Verificação de tier (território) | Mantém a coluna `tier` se já existir; cria nulo caso contrário | A Task 4 fornece os grupos; não inferir pares sem validação |
+| Território (tier) | Lê `dim_territorio` direto da URL, como as demais tabelas | O Parquet no GitHub já traz `tier` preenchido nas 27 UFs; sem fallback de nulos |
 | Tipagem do modelo | Códigos como texto, medidas como número, datas como DateTime | Identificadores não são grandezas aditivas |
 
 ## Relacionamentos
@@ -133,7 +137,10 @@ preservar o campo `escopo_vendas` na interpretação (ADR 0008).
 1. Gerar a gold: `uv run canavis-pipeline --stage build`.
 2. Gerar o TMDL: `uv run python scripts/gerar_modelo_powerbi.py`.
 3. Abrir `powerbi/canavis.pbix`, criar um script TMDL e aplicar `powerbi/modelo.tmdl`.
-4. Atualizar o modelo completo na Página Inicial, incluindo as dimensões.
+   Como a fonte é a URL raw do GitHub (`Web.Contents`), não há caminho de máquina
+   a ajustar: o mesmo `.tmdl` serve para todos. Alternativamente, importe via
+   **Obter Dados → Web** apontando para a URL base documentada acima.
+4. Atualizar o modelo completo na Página Inicial (**Refresh**), incluindo as dimensões.
 5. Executar `powerbi/validacao-integracao.dax` no editor de consultas DAX.
    Conferir a coluna `Confere` contra `Esperado` (tolerância 0,000001 para taxas) e as
    contagens da tabela acima. Vazio esperado deve continuar vazio, não zero.
