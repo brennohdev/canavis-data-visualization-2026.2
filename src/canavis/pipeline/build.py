@@ -20,6 +20,12 @@ _NIVEIS = {
 _FONTE_ID = "ibge_pam_1612"
 _ORIGEM = {"extracao", "cod_local", "local", "periodo", "variavel", "valor", "situacao_valor"}
 _REFERENCIA = Path(__file__).resolve().parents[3] / "data/reference/municipios_pb_ibge.parquet"
+# Colunas de análise histórica que só fazem sentido em micro/UF (ver temporal.py).
+# O município não recebe série temporal, então sua versão por nível as descarta.
+_COLUNAS_TEMPORAIS = [
+    "tendencia_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
+    "status_chow", "ponto_candidato_quebra", "quebra_confirmada",
+]
 
 
 def build_all() -> dict[str, Path]:
@@ -29,6 +35,7 @@ def build_all() -> dict[str, Path]:
         storage.read(settings.paths.interim, "ibge_pam"), pd.read_parquet(_REFERENCIA)
     )
     tabelas["fato_producao"] = enriquecer_serie(tabelas["fato_producao"])
+    tabelas.update(separar_por_nivel(tabelas["fato_producao"]))
     fontes = []
     if storage.exists(settings.paths.interim, "conab_cana"):
         tabelas["fato_industria"] = construir_industria(storage.read(settings.paths.interim, "conab_cana"))
@@ -58,6 +65,25 @@ def build_all() -> dict[str, Path]:
         _log.info("gold | %s | %d linhas | %s", nome, len(frame), destino.name)
         escritos[nome] = destino
     return escritos
+
+
+def separar_por_nivel(fato: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """Materializa um fato de produção por nível a partir do empilhado.
+
+    Cada nível (UF, microrregião, município) vira uma tabela só com as suas
+    linhas, sem renomear colunas. O município descarta as 7 colunas temporais
+    (`_COLUNAS_TEMPORAIS`), que ele nunca preenche; UF e microrregião as mantêm.
+    O `fato_producao` empilhado permanece intacto (retrocompatibilidade).
+    """
+    por_nivel = {}
+    for nivel, nome in [("uf", "fato_producao_uf"),
+                        ("microrregiao", "fato_producao_microrregiao"),
+                        ("municipio", "fato_producao_municipio")]:
+        recorte = fato[fato["nivel_territorial"] == nivel].reset_index(drop=True)
+        if nivel == "municipio":
+            recorte = recorte.drop(columns=_COLUNAS_TEMPORAIS)
+        por_nivel[nome] = recorte
+    return por_nivel
 
 
 def construir_estrela(ibge: pd.DataFrame, referencia: pd.DataFrame) -> dict[str, pd.DataFrame]:

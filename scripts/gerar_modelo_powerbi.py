@@ -3,7 +3,15 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-FATOS = ["fato_producao", "fato_industria", "fato_vendas_etanol_uf", "fato_vendas_etanol_municipio"]
+FATOS = [
+    "fato_producao",
+    "fato_producao_uf",
+    "fato_producao_microrregiao",
+    "fato_producao_municipio",
+    "fato_industria",
+    "fato_vendas_etanol_uf",
+    "fato_vendas_etanol_municipio",
+]
 # Base da URL raw do GitHub para os Parquet da gold. Trocar de branch (main -> SHA)
 # ou de repositório é uma edição de uma linha aqui.
 URL_BASE = "https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed"

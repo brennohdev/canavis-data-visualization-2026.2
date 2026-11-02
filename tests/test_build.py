@@ -2,7 +2,8 @@ import pandas as pd
 import pytest
 
 from canavis import storage
-from canavis.pipeline.build import agregar_producao, construir_estrela
+from canavis.pipeline.build import agregar_producao, construir_estrela, separar_por_nivel
+from canavis.pipeline.temporal import enriquecer_serie
 
 
 def _dados():
@@ -128,6 +129,52 @@ def test_tier_preserva_integridade_referencial_da_estrela():
     dim = tabelas["dim_territorio"]
     assert fato["territorio_id"].isin(dim["territorio_id"]).all()
     assert dim["territorio_id"].is_unique
+
+
+_COLUNAS_TEMPORAIS = [
+    "tendencia_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
+    "status_chow", "ponto_candidato_quebra", "quebra_confirmada",
+]
+
+
+def _fato_enriquecido_por_nivel():
+    fato = enriquecer_serie(construir_estrela(*_dados_com_ufs())["fato_producao"])
+    return fato, separar_por_nivel(fato)
+
+
+def test_separar_por_nivel_isola_cada_nivel():
+    fato, por_nivel = _fato_enriquecido_por_nivel()
+    assert list(por_nivel["fato_producao_uf"]["nivel_territorial"].unique()) == ["uf"]
+    assert list(por_nivel["fato_producao_municipio"]["nivel_territorial"].unique()) == ["municipio"]
+    # O recorte de microrregião herda o nível mesmo quando o fixture não traz linhas.
+    micro = por_nivel["fato_producao_microrregiao"]
+    assert set(micro["nivel_territorial"].unique()) <= {"microrregiao"}
+
+
+def test_separar_por_nivel_nao_sobrepoe_nem_perde_quantidade():
+    fato, por_nivel = _fato_enriquecido_por_nivel()
+    ano = 2023
+    uf_empilhado = fato[(fato["nivel_territorial"] == "uf") & (fato["ano_referencia"] == ano)]
+    total_uf = uf_empilhado["quantidade_produzida_t"].sum()
+    uf_nivel = por_nivel["fato_producao_uf"]
+    uf_nivel = uf_nivel[uf_nivel["ano_referencia"] == ano]
+    assert uf_nivel["quantidade_produzida_t"].sum() == total_uf
+    # Micro/município de um mesmo recorte nunca ultrapassam o total UF (seção 7.1).
+    for nome in ["fato_producao_microrregiao", "fato_producao_municipio"]:
+        recorte = por_nivel[nome]
+        recorte = recorte[recorte["ano_referencia"] == ano]
+        assert recorte["quantidade_produzida_t"].sum() <= total_uf
+
+
+def test_separar_por_nivel_municipio_sem_colunas_temporais():
+    _, por_nivel = _fato_enriquecido_por_nivel()
+    municipio = por_nivel["fato_producao_municipio"]
+    for coluna in _COLUNAS_TEMPORAIS:
+        assert coluna not in municipio.columns
+    for nome in ["fato_producao_uf", "fato_producao_microrregiao"]:
+        colunas = por_nivel[nome].columns
+        for coluna in _COLUNAS_TEMPORAIS:
+            assert coluna in colunas
 
 
 @pytest.mark.parametrize("formato", ["parquet", "csv", "xlsx"])

@@ -116,6 +116,244 @@ createOrReplace
 			source =
 				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_producao.parquet"))
 
+	table fato_producao_uf
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column quantidade_produzida_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: quantidade_produzida_t
+
+		column area_colhida_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_colhida_ha
+
+		column produtividade_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: produtividade_t_ha
+
+		column situacao_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_quantidade
+
+		column situacao_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_area
+
+		column tendencia_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: tendencia_t_ha
+
+		column oscilacao_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: oscilacao_t_ha
+
+		column f_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: f_chow
+
+		column p_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: p_chow
+
+		column status_chow
+			dataType: string
+			summarizeBy: none
+			sourceColumn: status_chow
+
+		column ponto_candidato_quebra
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: ponto_candidato_quebra
+
+		column quebra_confirmada
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: quebra_confirmada
+
+		partition fato_producao_uf = m
+			mode: import
+			source =
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_producao_uf.parquet"))
+
+	table fato_producao_microrregiao
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column quantidade_produzida_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: quantidade_produzida_t
+
+		column area_colhida_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_colhida_ha
+
+		column produtividade_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: produtividade_t_ha
+
+		column situacao_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_quantidade
+
+		column situacao_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_area
+
+		column tendencia_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: tendencia_t_ha
+
+		column oscilacao_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: oscilacao_t_ha
+
+		column f_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: f_chow
+
+		column p_chow
+			dataType: double
+			summarizeBy: none
+			sourceColumn: p_chow
+
+		column status_chow
+			dataType: string
+			summarizeBy: none
+			sourceColumn: status_chow
+
+		column ponto_candidato_quebra
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: ponto_candidato_quebra
+
+		column quebra_confirmada
+			dataType: boolean
+			summarizeBy: none
+			sourceColumn: quebra_confirmada
+
+		partition fato_producao_microrregiao = m
+			mode: import
+			source =
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_producao_microrregiao.parquet"))
+
+	table fato_producao_municipio
+		column territorio_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: territorio_id
+
+		column data_referencia
+			dataType: dateTime
+			summarizeBy: none
+			sourceColumn: data_referencia
+
+		column fonte_id
+			dataType: string
+			summarizeBy: none
+			sourceColumn: fonte_id
+
+		column nivel_territorial
+			dataType: string
+			summarizeBy: none
+			sourceColumn: nivel_territorial
+
+		column ano_referencia
+			dataType: int64
+			summarizeBy: none
+			sourceColumn: ano_referencia
+
+		column quantidade_produzida_t
+			dataType: double
+			summarizeBy: none
+			sourceColumn: quantidade_produzida_t
+
+		column area_colhida_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: area_colhida_ha
+
+		column produtividade_t_ha
+			dataType: double
+			summarizeBy: none
+			sourceColumn: produtividade_t_ha
+
+		column situacao_quantidade
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_quantidade
+
+		column situacao_area
+			dataType: string
+			summarizeBy: none
+			sourceColumn: situacao_area
+
+		partition fato_producao_municipio = m
+			mode: import
+			source =
+				Parquet.Document(Web.Contents("https://raw.githubusercontent.com/brennohdev/canavis-data-visualization-2026.2/main/data/processed/fato_producao_municipio.parquet"))
+
 	table fato_industria
 		column territorio_id
 			dataType: string
@@ -506,6 +744,69 @@ createOrReplace
 
 	relationship fato_dim_fonte
 		fromColumn: fato_producao.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_uf_dim_territorio
+		fromColumn: fato_producao_uf.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_uf_dim_calendario
+		fromColumn: fato_producao_uf.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_uf_dim_fonte
+		fromColumn: fato_producao_uf.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_microrregiao_dim_territorio
+		fromColumn: fato_producao_microrregiao.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_microrregiao_dim_calendario
+		fromColumn: fato_producao_microrregiao.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_microrregiao_dim_fonte
+		fromColumn: fato_producao_microrregiao.fonte_id
+		toColumn: dim_fonte.fonte_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_municipio_dim_territorio
+		fromColumn: fato_producao_municipio.territorio_id
+		toColumn: dim_territorio.territorio_id
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_municipio_dim_calendario
+		fromColumn: fato_producao_municipio.data_referencia
+		toColumn: dim_calendario.data_referencia
+		fromCardinality: many
+		toCardinality: one
+		crossFilteringBehavior: oneDirection
+
+	relationship fato_producao_municipio_dim_fonte
+		fromColumn: fato_producao_municipio.fonte_id
 		toColumn: dim_fonte.fonte_id
 		fromCardinality: many
 		toCardinality: one
