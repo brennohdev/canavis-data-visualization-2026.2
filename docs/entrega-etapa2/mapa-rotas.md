@@ -25,25 +25,37 @@
 
 | Origem | Destino | Mecanismo | Contexto transportado | Pergunta que a transição responde |
 |--------|---------|-----------|-----------------------|-----------------------------------|
-| Panorama Nacional | Detalhe do Estado | **Drill-through** | UF selecionada | "Como as microrregiões dessa UF se comparam entre si e evoluíram ao longo das safras?" |
-| Detalhe do Estado | Detalhe do Município | **Drill-through** | Microrregião/município selecionado | "Como é a série histórica e o mix açúcar/etanol desse município?" |
-| Detalhe do Estado / Município | Panorama Nacional | **Botão** (navegação de página) | — (retorno ao panorama) | "Voltar à visão geral para escolher outra região." |
+| Panorama Nacional | Detalhe do Estado | **Drill-through** | UF selecionada (clique na barra/estado) | "Como essa UF se posiciona, como evoluiu e como é o seu mix?" |
+| Detalhe do Estado | Detalhamento PB | **Botão** (navegação de página) | — (fixo na PB) | "Como se distribuem produtividade e vendas entre microrregiões e municípios da Paraíba?" |
+| Detalhe do Estado / Detalhamento PB / Panorama | Metodologia | **Botão** (navegação de página) | — | "Quais as fontes, definições e limitações por trás dos números?" |
+| Detalhe do Estado / Detalhamento PB | Panorama Nacional | **Botão de voltar** (seta no topo) | — (retorno) | "Voltar à visão geral para escolher outra região." |
 
-**A primeira linha é a transição obrigatória que transporta contexto.** As demais podem ser
-botões. Preencher/ajustar conforme a implementação real.
+**A primeira linha é a transição obrigatória que transporta contexto** — o drill-through leva a
+UF clicada no Panorama para a tela de detalhe, que mostra só aquela UF (ex.: "Detalhe de Pará",
+com produtividade 67,62 t/ha, a do PA, não o total nacional).
+
+**Por que a transição Estado → Município é botão fixo na PB, e não drill-through com contexto:**
+a base municipal só foi coletada e validada para a Paraíba (limitação documentada na
+Metodologia e no ADR 0008). As demais UFs existem apenas em nível UF. Logo, um drill-through
+para o detalhe municipal de outra UF não teria dados — então o detalhamento municipal é fixo na
+PB, a região da persona. O requisito obrigatório de "transição que transporta contexto" já é
+cumprido pela primeira linha (Panorama → Estado).
 
 ---
 
 ## Segmentações (slicers) — mínimo 3, relevantes
 
-| Slicer | Tela(s) | Por que é relevante (não decorativo) |
-|--------|---------|--------------------------------------|
-| Ano / safra | todas | Define o período da leitura; a pergunta de decisão é safra a safra |
-| Indicador | 1 e 2 | Troca o que está sendo comparado (liga com o parâmetro de campo da Task 9) |
-| Tier / região de comparação | 1 | Escolhe os pares semelhantes (Task 4) — responde direto ao feedback |
+Implementados no Panorama Nacional (3 slicers relevantes):
 
-Evitar slicer decorativo (ex.: filtro de "fonte de dados" na tela principal). Estado e Município
-como slicer são opcionais e só se não forem redundantes com o drill-through.
+| Slicer | Campo | Por que é relevante (não decorativo) |
+|--------|-------|--------------------------------------|
+| Ano | `dim_calendario[ano]` | Define o período da leitura; a pergunta de decisão é safra a safra |
+| Grupo industrial | `dim_territorio[tier]` | Filtra o conjunto de comparação por porte (pares semelhantes — Task 4), respondendo direto ao feedback |
+| Referência de comparação | parâmetro de campo (Task 9) | Alterna contra qual referência a produtividade é lida (seleção / grupo / participação) — muda a leitura |
+
+Nenhum slicer decorativo. O slicer "Grupo industrial" e o parâmetro "Referência de comparação"
+só fazem sentido no Panorama (nível UF), onde o tier existe; não aparecem nas telas de detalhe
+municipal (tier nulo em município/microrregião, por decisão do ADR 0006).
 
 ---
 
@@ -111,14 +123,14 @@ filtra `nivel_territorial = "municipio"`. Sem isso, as medidas retornam vazio de
 
 ---
 
-## Teste de aceitação (fazer antes de fechar a issue #12)
+## Teste de aceitação (issue #12) — status
 
-- [ ] Existem 3+ telas com navegação funcionando.
-- [ ] Clicar na Paraíba no Panorama abre o Detalhe do Estado mostrando **só a PB** (recorte, não o total).
-- [ ] A transição Estado → Município transporta o recorte selecionado.
-- [ ] Há botão de voltar / navegação explícita entre as telas.
-- [ ] Existem 3+ segmentações relevantes (ano, tier, indicador), nenhuma decorativa.
-- [ ] Tabela 2.1 preenchida com o que foi de fato implementado.
+- [x] Existem 3+ telas com navegação funcionando (Panorama, Detalhe do Estado, Detalhamento PB, Metodologia = 4 telas).
+- [x] Clicar numa UF no Panorama abre o Detalhe do Estado mostrando **só aquela UF** (verificado: "Detalhe de Pará" com produtividade 67,62 t/ha, a do PA).
+- [x] Há botão de voltar (seta no topo) e botões de navegação explícita entre as telas.
+- [x] Existem 3+ segmentações relevantes (Ano, Grupo industrial, Referência de comparação), nenhuma decorativa.
+- [x] Tabela 2.1 preenchida com o que foi de fato implementado.
+- [n/a] Transição Estado → Município com contexto: substituída por botão fixo na PB, por limitação da base municipal (só PB validada). O requisito de transição com contexto é cumprido por Panorama → Estado.
 
 ## Armadilhas
 

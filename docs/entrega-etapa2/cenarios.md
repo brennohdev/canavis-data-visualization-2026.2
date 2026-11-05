@@ -38,14 +38,18 @@ expõe.
 
 ## Tabela 2.3 — Cenários simulados
 
-| Cenário | Valor do parâmetro | O que muda no relatório | Leitura e implicação para a persona |
-|---------|--------------------|-------------------------|-------------------------------------|
-| **Base** | Desvio vs seleção (todas as UFs) | O visual de comparação mede a PB contra a média de todas as 27 UFs; o desvio aparece fortemente negativo | "A PB está muito abaixo da média nacional" — mas essa média é puxada por São Paulo. Leitura de contexto amplo, pouco acionável para decidir plantio. |
-| **Alternativo 1** | Desvio vs grupo (tier "media escala") | A referência passa a ser a média das 14 UFs do mesmo porte; o desvio recalcula contra pares comparáveis e o ranking reordena dentro do grupo | "Entre estados de porte parecido, onde a PB está?" Referência justa (Task 4). Sustenta decisão de meta e priorização: dá para perseguir a eficiência dos pares reais, não a de SP. |
-| **Alternativo 2** | Participação regional | O visual passa a mostrar o peso da PB no total nacional (%), não o desvio de eficiência | "Quanto a PB representa da produção do país?" Leitura de escala/relevância, não de eficiência. Mostra que porte e eficiência são perguntas distintas — reforça por que o tier existe. |
+Valores reais observados no painel (ano 2023), que ilustram cada cenário:
 
-> Ajuste livre: se preferir que o cenário-base já seja o tier (pares), inverta Base e
-> Alternativo 1. O importante é os três cenários existirem e cada um mudar a leitura.
+| Cenário | Valor do parâmetro | Resultado para a PB | O que muda no relatório | Leitura e implicação para a persona |
+|---------|--------------------|--------------------|-------------------------|-------------------------------------|
+| **Base** | Desvio vs seleção (todas as UFs) | **−16,96%** | O visual mede a PB contra a média das 27 UFs; o desvio aparece negativo | "A PB está abaixo da média nacional" — mas essa média é puxada por São Paulo (56,8% da produção). Leitura de contexto amplo, pouco acionável para decidir plantio. |
+| **Alternativo 1** | Desvio vs grupo (tier "media escala") | **+3,41%** | A referência passa a ser a média das 14 UFs do mesmo porte; o desvio recalcula contra pares comparáveis | A leitura **inverte de sinal**: entre estados de porte parecido, a PB está *acima* da média. Referência justa (Task 4). Sustenta meta e priorização: perseguir a eficiência dos pares reais, não a de SP. |
+| **Alternativo 2** | Participação regional | **0,90%** | O visual passa a mostrar o peso da PB no total nacional (%), não o desvio de eficiência | "A PB representa 0,90% da produção do país." Leitura de escala/relevância, não de eficiência. Mostra que porte e eficiência são perguntas distintas — reforça por que o tier existe. |
+
+> O caso é exemplar do que o roteiro pede ("mudar a leitura, não só o número"): o **mesmo** valor
+> de produtividade da PB (64,69 t/ha) é lido como **−16,96%** contra todo o país e como **+3,41%**
+> contra os pares — a conclusão muda de "a PB vai mal" para "a PB vai bem no seu grupo". O título
+> ativo do painel acompanha: "PB está 3,4% acima do seu grupo industrial".
 
 ## Passo a passo no Power BI — parâmetro de campo
 
@@ -83,13 +87,13 @@ rende demonstração forte):
    evolução. Cenários: Base = meta no patamar atual; Alternativo = meta no nível dos pares do
    tier; Alternativo = meta ambiciosa (nível do tier grande).
 
-## Teste de aceitação (antes de fechar a issue #13)
+## Teste de aceitação (issue #13) — status
 
-- [ ] Existe pelo menos 1 parâmetro (campo ou numérico) com slicer na tela.
-- [ ] Trocar o valor do parâmetro muda a leitura do visual (não só o número) — demonstrável nos
-      3 cenários da Tabela 2.3.
-- [ ] O cenário de pares (desvio vs grupo) recalcula contra o tier e reordena coerentemente.
-- [ ] Tabela 2.3 preenchida com o que foi de fato implementado, com a implicação para a persona.
+- [x] Existe o parâmetro de campo `Referência de comparação` com slicer no Panorama.
+- [x] Trocar o valor do parâmetro muda a leitura do visual (não só o número): o desvio da PB vai
+      de −16,96% (contra todas as UFs) para +3,41% (contra o grupo) — inverte de sinal.
+- [x] O cenário de pares (desvio vs grupo) recalcula contra o tier "media escala" (Task 4).
+- [x] Tabela 2.3 preenchida com os valores reais e a implicação para a persona.
 
 ## Armadilhas
 
