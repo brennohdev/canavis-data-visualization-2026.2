@@ -8,6 +8,28 @@
 
 ---
 
+## Decisão de escopo (Etapa 2) — leia primeiro
+
+**Estado na Etapa 2:** a camada analítica está completa — decomposição tendência/oscilação, teste
+de quebra e diagnóstico econométrico (notebook 04), com os resultados materializados na gold
+(`tendencia_t_ha`, `oscilacao_t_ha`, `p_chow`, `ponto_candidato_quebra`, `quebra_confirmada`). No
+painel, porém, a tela de série temporal exibe **apenas a linha de produtividade observada**.
+
+**Por que a decomposição (tendência + banda de incerteza + marcador de quebra) NÃO foi para a tela
+nesta etapa:** a própria análise mostrou que a série é curta (21 pontos anuais) e **não sustenta
+afirmação de quebra estrutural** (a PB não sobrevive à correção FDR, p ajustado 0,0606). Levar
+tendência e banda para a tela, numa série tão curta, corre o risco de comunicar mais certeza do
+que os dados permitem. A equipe optou por **validar com o professor** se vale a pena exibir
+tendência/oscilação dado o tamanho da série, antes de implementar — e deixar essa camada visual
+para a **Etapa 3** (onde entram também as fontes internacionais de preço/câmbio do ADR 0010, que
+dão horizonte mais longo).
+
+Esta decisão é coerente com o espírito do roteiro ("descobrir o que não funciona enquanto mudar é
+barato") e com o próprio feedback da Etapa 1 (não ampliar escopo sem diagnóstico). O guia abaixo
+permanece como **especificação pronta** para a Etapa 3, caso o professor valide a exibição.
+
+---
+
 ## Princípio da entrega (leia primeiro)
 
 A série de produtividade (t/ha) é **anual e curta** (21 pontos, 2003–2023) e, no diagnóstico
