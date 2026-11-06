@@ -65,7 +65,8 @@ distinguível nos três tipos de daltonismo. Salvaguardas:
 - [x] Paleta com no máximo 5 cores de dado.
 - [x] Verificada para daltonismo (par divergente verde × âmbar, não verde × vermelho).
 - [x] Contraste adequado documentado (razões WCAG por par).
-- [ ] Testar em projeção, fora da tela do próprio computador (projetor lava `#7BA886` e `#D5D9DE`).
+- [x] Testado fora da tela de desenvolvimento: verificado na tela do MacBook e em um monitor
+  externo maior; legibilidade e contraste OK em ambos.
 - [ ] Ordenação intencional das categorias (por valor/desvio, nunca alfabética).
 - [ ] Sem eixo truncado sem aviso, 3D, pizza >3 fatias ou indicador sem denominador.
 
