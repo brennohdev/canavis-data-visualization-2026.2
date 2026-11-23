@@ -84,4 +84,18 @@ uv run --extra dev pytest
 
 - **Stage 1 — Discovery (current).** Persona, problem, documented sources, and data layer.
 - **Stage 2 — Prototype.** Power BI report on the `processed` layer.
-- **Stage 3 — Application.** Dash consuming `canavis.domain` and `canavis.pipeline`.
+- **Stage 3 — Application.** React + TypeScript front end and FastAPI + DuckDB back end
+  (single container) on top of `canavis.domain` and `canavis.pipeline`. Stack approved by the
+  professor; see [ADR 0013](docs/decisoes/0013-stack-etapa3.md).
+
+### Stage 3 schedule
+
+Moodle deadline: **2026-12-01**. Internal delivery target: **2026-11-27** (deadline minus 4 days,
+so the submission lands at least 72 h early for the early-delivery bonus).
+
+| Milestone | Scope | Internal date |
+|-----------|-------|---------------|
+| M1 — Foundation and walking skeleton | Tasks 1–4 | 2026-11-24 |
+| M2 — Analytical core | Tasks 5–9 | 2026-11-25 |
+| M3 — Texts, scenarios and extras | Tasks 10–15 | 2026-11-26 |
+| M4 — Quality and delivery | Tasks 16–20 | 2026-11-27 |
