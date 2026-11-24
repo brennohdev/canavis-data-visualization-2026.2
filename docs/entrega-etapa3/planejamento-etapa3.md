@@ -2,6 +2,8 @@
 
 Investigação somente leitura. Nenhum código de produção foi alterado. O backlog de issues está em `backlog.json` (mesma pasta). Prazo exato da entrega no Moodle: **desconhecido** (registrado como risco R1 e pergunta P1).
 
+> **Atualizações posteriores à varredura (Etapa 3, novembro de 2026).** (1) Prazo no Moodle: **01/12/2026**; meta interna **27/11/2026** (README do projeto). R1 e P1 estão resolvidos. (2) O professor **confirmou a stack** (ADR 0013). R2 e P2 estão resolvidos. (3) Os passos 3 e 5 da jornada foram revisados com dados da gold: a versão vigente está em `jornada-e-rotas.md` (seção 7) e `design-system.md`, e as seções 2, 3, 5 e 8 abaixo foram corrigidas. Evidência: `scripts/analise_tendencia_base_municipal.py`. O texto original das seções corrigidas não foi preservado aqui; está no histórico do git.
+
 ## 0. Resposta curta
 
 1. **Stack:** confirmo a recomendação **React + TypeScript (Vite) no front e FastAPI + DuckDB sobre os parquet da gold no back**, empacotados em **um único contêiner** (FastAPI serve a API e o build estático do React). Isso captura, no mesmo desenho, os extras 3 (DuckDB com consulta parametrizada), 4 (API própria e consumo de APIs externas) e 5 (publicação), além de resolver "sobe com um comando" (`docker compose up`).
@@ -45,23 +47,23 @@ Formato: situação -> o que ele vê -> decisão -> resultado. "PAM" = só IBGE 
 |---|---|---|---|
 | S1 | Planejamento de plantio: onde priorizar área | PAM microrregião + tier | Não |
 | S2 | Revisão de meta de safra | PAM UF/micro + parâmetro "meta" | Não |
-| S3 | Fornecedores: quais municípios olhar | PAM município (retrato) | Não |
+| S3 | Base de cana: em quais municípios está a área | PAM município (área e quantidade) | Não |
 | S4 | Dólar e açúcar ICE sobem: vale levar a pauta de mix à reunião? | PTAX, ICE, CONAB share ATR | **Sim** |
 | S5 | Safra fraca na Índia/Tailândia e estoques baixos | USDA PSD, ICE, COT | **Sim** |
-| S6 | 2023 foi pico: a meta deve subir? | PAM série, tendência, janela | Não |
+| S6 | 2023 foi pico: a meta deve subir? | PAM série, médias por fase, inclinação com intervalo | Não |
 | S7 | Cobertura insuficiente: o app recusa recomendar | cobertura por fonte/território | Não |
 | S8 | Véspera da reunião de programação: resumo em 10 minutos | `/prioridades` + link compartilhável | Opcional |
 
 **S1 — Planejamento de plantio (PAM sozinha).**
 - Situação: antes do planejamento anual, ele quer saber quais microrregiões da PB estão perdendo posição.
-- Vê: `/uf/PB` com séries de produtividade por microrregião (múltiplos pequenos), tendência na janela de 10 anos com banda de incerteza, e a leitura: "Microrregião X: produtividade 2023 de A t/ha, B% abaixo da média da PB; tendência de C t/ha/ano (janela 2013-2023)". Ação sugerida: "vale revisar a priorização de área nessa microrregião; confira a área colhida antes (D ha)".
+- Vê: `/uf/PB` com séries de produtividade por microrregião (múltiplos pequenos), inclinação na janela de 10 anos com intervalo de confiança e classe (sobe, estável ou cai; só sobe ou cai se o intervalo exclui zero), e a leitura: "Microrregião X: produtividade 2023 de A t/ha, B% abaixo da média da PB; inclinação de C t/ha/ano (IC 95% de D a E; janela 2013-2023)". Ação sugerida: "vale revisar a priorização de área nessa microrregião; confira a área colhida antes (D ha)".
 - Decide: reorientar esforço de tratos e renovação para as microrregiões em queda ou adiar expansão onde a base é pequena.
 - Resultado: priorização com número e referência (critério de sucesso 3), em minutos (critério 1).
 - Não pode afirmar: causa da queda, produtividade futura, quebra estrutural (ADR 0009/0011: PB não sobrevive ao FDR, p ajustado 0,0606). Série de 21 pontos.
 
 **S2 — Meta de safra (PAM).** Parâmetro "meta de produtividade (t/ha)". Ele vê a distância entre o realizado e a meta, e onde a meta está na distribuição histórica (percentil) e entre pares do tier. Decide se a meta é ambiciosa demais ("meta acima do máximo observado da PB na série") ou conservadora. Não afirma probabilidade de atingir a meta.
 
-**S3 — Fornecedores (PAM município, só PB).** Retrato de um ano; 62% dos pares município-ano têm rendimento suprimido (ADR 0004). Ele vê apenas municípios com dado, ordenados com a área colhida ao lado, e "N de M municípios sem informação (supressão do IBGE)". Decide quais fornecedores aprofundar com dado próprio. Não afirma que município sem dado "produz pouco" (ausente != zero). Quando restam menos de 5 municípios com dado, o app recusa ranking.
+**S3 — Base de cana por município (PAM, só PB).** Retrato de um ano. Em 2023, 82 dos 223 municípios produzem cana, 140 têm produção zero registrada (`sem_producao`, ADR 0008) e 1 está suprimido; os "62% ausentes" do ADR 0004 misturam zero real e supressão (errata no ADR 0004). Ele vê os municípios ordenados por **área colhida**, com participação na área da PB, e "82 de 223 municípios produzem cana; os demais têm produção zero". Decide em quais municípios concentrar a atenção ao conversar com fornecedores, usando dado próprio da usina. Não afirma quem fornece à usina (dado privado), nem que um município é mais produtivo que outro: a produtividade municipal tem poucos valores distintos (13 entre 82 municípios em 2023, 39% em 65,0 t/ha) e a quantidade deriva dela. Não afirma que município com zero registrado "produz pouco". Quando restam menos de 5 municípios produtores, o app recusa ranking.
 
 **S4 — Dólar sobe e ICE sobe (INT).**
 - Situação: câmbio e açúcar ICE em alta no trimestre. A PB tem perfil etanoleiro (27,54% de açúcar em ATR em 2023/24, abaixo de SP 55,4%, MG 50,3% etc., `auditoria-medidas-dax.md`).
@@ -72,7 +74,7 @@ Formato: situação -> o que ele vê -> decisão -> resultado. "PAM" = só IBGE 
 
 **S5 — Safra fraca na Índia/Tailândia (INT).** Vê produção, exportação e estoques finais por país (USDA PSD, ano de safra corrente), variação contra a safra anterior, e o ICE no mesmo período. Texto: "o USDA estima estoques finais da Índia X% menores que na safra anterior; o ICE variou Y% no período". Decide ajustar a expectativa de contexto de preço (reunião de planejamento, orçamento). Não afirma que um causa o outro. Há risco de licença/acesso do PSD: validar em Task 7.
 
-**S6 — Pico de 2023 (PAM).** A PB subiu cerca de 15% em 2023, contra 1% a 7% nas outras UFs canavieiras (ADR 0004). Ele vê o alerta "2023 destoa do padrão da série (variação de +15% contra desvio-padrão histórico de Z%)" e consegue mudar a janela da tendência (5, 10 ou 21 anos). Decide não ancorar a meta no pico. Não afirma "novo patamar" nem "anomalia por clima" (ADR 0007 rejeitou chuva).
+**S6 — Pico de 2023 (PAM).** A PB subiu cerca de 15% em 2023, contra 1% a 7% nas outras UFs canavieiras (ADR 0004). Ele vê o alerta "2023 destoa do padrão da série (variação de +15% contra desvio-padrão histórico de Z%)" e vê a média por fase (50,9 t/ha em 2003-12 e 55,0 t/ha em 2013-22) com 2023 destacado (64,7 t/ha), e consegue mudar a janela da inclinação (5, 10 ou 21 anos). Nas janelas de 5 e 10 anos o intervalo de confiança da PB inclui zero (classe "estável"), e sem 2023 a inclinação de 2013 a 2022 é +0,30 t/ha/ano, contra +0,67 com 2023. Decide não ancorar a meta no pico. Não afirma "novo patamar" nem "anomalia por clima" (ADR 0007 rejeitou chuva).
 
 **S7 — Recusa por cobertura insuficiente.** Ele filtra uma microrregião com mais de metade da série ausente, ou uma UF sem dado CONAB. O app mostra o estado "dado insuficiente", diz o que falta ("12 de 21 anos sem informação") e **não gera ação sugerida**. Isso é critério de qualidade, não falha: demonstra que as regras têm limiar mínimo.
 
@@ -90,9 +92,9 @@ Formato: situação -> o que ele vê -> decisão -> resultado. "PAM" = só IBGE 
 |---|---|---|---|---|---|
 | 1 | Reunião de programação em 2 dias | "Como estamos frente aos pares?" | `/` | Abre; lê KPIs e a leitura do recorte | Posição da PB (desvio vs grupo) com referência explícita |
 | 2 | Estranha o desvio | "Contra quem estou me comparando?" | `/` | Troca a referência (seleção, grupo, participação) | Entende que a leitura muda com a referência |
-| 3 | Quer a evolução | "Está melhorando ou foi 2023?" | `/uf/PB` | Ajusta janela de tendência | Tendência com banda e aviso de quebra não confirmada |
+| 3 | Quer a evolução | "Está melhorando ou foi 2023?" | `/uf/PB` | Lê a média por fase com 2023 destacado; abre a inclinação com intervalo (5, 10 ou 21 anos) como apoio | Fase e pico separados; "sobe" ou "cai" só com intervalo que exclui zero; aviso de quebra não confirmada |
 | 4 | Quer localizar o problema | "Quais microrregiões caem?" | `/uf/PB` -> `/microrregiao/:id` | Clica na microrregião (drill) | Série, referência e ação sugerida |
-| 5 | Quer fornecedores | "Quais municípios vejo?" | `/municipios` | Filtra micro e área mínima | Retrato com ausentes marcados |
+| 5 | Quer saber onde está a base de cana | "Onde está a cana na PB?" | `/municipios` | Ordena por área colhida; filtra micro e área mínima | Participação na área da PB; zero real separado de suprimido; sem ranking de produtividade |
 | 6 | Sinal de mercado | "O açúcar subiu em reais?" | `/mercado` | Lê câmbio, ICE, países | Contexto com data e fonte |
 | 7 | Hipótese | "E se a meta for 65?" | `/cenarios` | Mexe nos parâmetros | Leitura muda; cenário vira link |
 | 8 | Prepara pauta | "Quais 3 casos levo?" | `/prioridades` | Copia o link | Resumo reabre idêntico em outro lugar |
@@ -103,9 +105,9 @@ Formato: situação -> o que ele vê -> decisão -> resultado. "PAM" = só IBGE 
 | Rota | Conteúdo | Parâmetros aceitos | Como o usuário chega |
 |---|---|---|---|
 | `/` | Panorama nacional: KPIs, mapa e barras divergentes por UF, leitura do recorte | `ano`, `ref` (`selecao`\|`grupo`\|`participacao`), `tier`, `ind` (`produtividade`\|`participacao`\|`mix`), `janela` | Abertura; clique no logo |
-| `/uf/:sigla` (parâmetro de caminho) | Série, tendência, microrregiões da UF, leitura | `ano`, `ref`, `janela`, `meta` | Clique em UF no mapa/barras de `/` |
+| `/uf/:sigla` (parâmetro de caminho) | Série por fase, inclinação com intervalo, microrregiões da UF, leitura | `ano`, `ref`, `janela`, `meta` | Clique em UF no mapa/barras de `/` |
 | `/microrregiao/:cod` (parâmetro de caminho) | Série e referência da microrregião, municípios | `ano`, `janela` | Clique em microrregião em `/uf/PB` |
-| `/municipios` | Retrato de municípios da PB (só PB) | `ano`, `micro`, `area_min`, `ordem`, `pagina` | Botão em `/uf/PB`; clique na microrregião |
+| `/municipios` | Base de cana dos municípios da PB: área, participação e quantidade (só PB) | `ano`, `micro`, `area_min`, `ordem`, `pagina` | Botão em `/uf/PB`; clique na microrregião |
 | `/municipio/:cod` (parâmetro de caminho) | Retrato e série curta do município, com ausentes | `ano` | Clique na linha de `/municipios` |
 | `/cenarios` | Parâmetros de hipótese e comparação base x alternativos | `uf`, `ano`, `meta`, `cambio`, `ice`, `janela`, `ref`, `base` | Menu; botão "simular" em `/uf/:sigla` |
 | `/mercado` | Câmbio, ICE, balanço por país, COT, status das fontes | `periodo` (`3m`\|`12m`\|`5a`), `paises` (lista) | Menu; link no texto de cenário |
@@ -123,7 +125,7 @@ Controles globais: `ano`, território em foco (UF), `tier`, `ref`, `ind`, `janel
 | `ano` | Persiste | Persiste | Não se aplica (usa `periodo`) | Reinicia | O ano é o eixo de leitura de toda a decisão |
 | `ref` | Persiste até `/uf`; some em micro/município (tier não existe nesses níveis, ADR 0006) mas fica na URL e **volta** ao retornar | Persiste | Reinicia | Reinicia | Mantém a leitura coerente; só esconde onde não faz sentido |
 | `tier` | Persiste em `/` e `/uf`; irrelevante abaixo | Persiste | Reinicia | Reinicia | Tier só existe para UF |
-| `janela` | Persiste | Persiste | Reinicia | Reinicia | Altera a tendência; mudar sem avisar enganaria |
+| `janela` | Persiste | Persiste | Reinicia | Reinicia | Altera a inclinação; mudar sem avisar enganaria |
 | `ind` | Persiste | Reinicia (cenário tem indicador próprio) | Reinicia | Âncora | Evita indicador "preso" |
 | `meta`, `cambio`, `ice` | Persistem **na sessão da URL** em `/uf` e `/cenarios`; reiniciam em `/` | Origem | `cambio` e `ice` persistem | Reinicia | Hipótese não pode "vazar" para a leitura do realizado sem rótulo |
 | `micro`, `area_min`, `ordem`, `pagina` | Reiniciam ao trocar de nível ou de ano (paginação volta à 1) | Reinicia | Reinicia | Reinicia | Filtros locais valem só para a lista |
@@ -170,19 +172,19 @@ Funções: **D** descrever, **H** destacar, **A** sugerir ação. Todos os limia
 | R01 | D | Seleção com >= 1 registro | "Recorte: {território}, {ano}. Produtividade de {x} t/ha ({fonte}, dado de {ano_dado})." | **Seleção vazia:** "Nenhum registro atende a esta combinação de filtros. Tente: remover o grupo (tier), escolher outro ano ou ampliar a janela." |
 | R02 | D | Referência ativa | "Referência: média de {k} UFs do grupo {tier}." | **k < 5:** acrescenta "grupo com poucos pares; leitura frágil" e R05 passa a modo descritivo |
 | R03 | D | Fontes com último ano diferente (PAM 2023, ANP 2024, CONAB 2026/27) | "Atenção: PAM vai até {a}; CONAB até {safra} (estimativa)." | **Defasagem >= 2 anos entre fontes usadas na mesma tela:** destaca em faixa, não só em rodapé |
-| R04 | D | Município/micro com ausência | "{n} de {N} municípios sem informação (supressão do IBGE); não entram na média." | **Suprimido != zero:** nunca soma nem plota como 0; **cobertura < 50%:** aciona R12 |
+| R04 | D | Município/micro com zero registrado ou suprimido | "{n} de {N} municípios produzem cana em {ano}; {z} têm produção zero registrada e {s} estão sem informação (dado não divulgado pelo IBGE)." | **Suprimido != zero:** suprimido nunca soma nem plota como 0 e não entra na média; zero registrado plota como 0; **menos de 5 municípios produtores:** recusa ranking (R12); **cobertura < 50%:** aciona R12 |
 | R05 | H | \|desvio vs referência\| >= 5% | "A produtividade ficou {x}% {acima/abaixo} da referência ({ref})." | **\|desvio\| < 2%:** "em linha com"; **2% a 5%:** "ligeiramente"; **empate entre categorias** (diferença < 0,5 t/ha): "empate técnico entre A e B" |
 | R06 | H | Variação interanual >= 10% em módulo | "Houve {alta/queda} de {x}% frente a {ano-1}." | **Ano anterior ausente:** omite; **variação > 2 desvios-padrão da série:** acrescenta "valor fora do padrão histórico" |
-| R07 | H | Inclinação 5 anos e 10 anos com sinais opostos e \|inclinação\| >= limiar (a calibrar, ex. 0,3 t/ha/ano) | "A tendência mudou: {a} t/ha/ano nos últimos 5 anos contra {b} nos últimos 10." | **Série < 8 pontos:** suprime; **sempre** acrescenta "sem evidência confirmada de quebra estrutural" quando `quebra_confirmada` é falso |
+| R07 | H | Classes de 5 e 10 anos diferem (sobe, estável, cai) e os dois intervalos de confiança de 95% excluem zero | "A tendência mudou: {a} t/ha/ano nos últimos 5 anos contra {b} nos últimos 10 (intervalos em {tabela})." | **Série < 8 pontos:** suprime; **intervalo inclui zero:** classe "estável", sem alerta (caso atual da PB); **classe muda ao retirar o último ano:** acrescenta "a leitura depende de {ano}"; **sempre** acrescenta "sem evidência confirmada de quebra estrutural" quando `quebra_confirmada` é falso |
 | R08 | H | Meta ativa e produtividade < meta | "Em {ano}, a produtividade ficou {d} t/ha ({p}%) abaixo da meta de {m} t/ha." | **Meta > máximo da série:** "meta acima de qualquer valor observado desde {ano0}"; **meta ausente:** não gera |
 | R09 | H | Dispersão entre microrregiões: razão melhor/pior >= 1,3 | "Entre microrregiões da PB, a produtividade varia de {min} a {max} t/ha ({a} e {b})." | **Menos de 3 microrregiões com dado:** suprime; **empate no topo:** lista ambas |
 | R10 | H | Share açúcar ATR: PB vs mediana das UFs com dado | "Em {safra}, {s}% do ATR da PB foi para açúcar; mediana das UFs: {m}%." | **UF sem CONAB:** "sem dado industrial para esta UF"; fatores CONSECANA "a confirmar" entram como nota |
 | R11 | H | Preço do açúcar em R$ varia >= 10% em 90 dias | "O açúcar em reais {subiu/caiu} {x}% em 90 dias (ICE {a} US¢/lb; PTAX R$ {b})." | **Último dado > 5 dias úteis:** "último dado de {data}"; **fonte indisponível:** omite e mostra o selo "fonte fora do ar" |
 | R12 | A | Cobertura < limiar (ex. < 50% dos anos ou < 5 pares) | "Dados insuficientes para recomendar nesta combinação ({motivo})." | **Recusa explícita:** nenhuma ação sugerida; mostra o que falta |
-| R13 | A | R05 abaixo da referência + R07 tendência negativa + cobertura ok | "Vale revisar a priorização de área e tratos em {território}; confira a área colhida ({ha} ha) antes de decidir." | **Base pequena (área < limiar):** troca a ação por "olhar com cautela: base pequena" |
+| R13 | A | R05 abaixo da referência + R07 classe "cai" + cobertura ok | "Vale revisar a priorização de área e tratos em {território}; confira a área colhida ({ha} ha) antes de decidir." | **Base pequena (área < limiar):** troca a ação por "olhar com cautela: base pequena" |
 | R14 | A | R11 com alta + R10 PB abaixo da mediana de açúcar | "O contexto de preço favorece o açúcar. Se quiser, leve à reunião com o comercial a pergunta sobre o mix." | **Sem dado de câmbio ou ICE:** não gera; nunca diz "mude o mix" |
 | R15 | H | Países-referência (PSD): variação de estoques finais ou exportações >= 10% vs safra anterior | "O USDA estima {indicador} da {país} {x}% {maior/menor} que na safra anterior." | **País sem dado do ano corrente:** omite; nunca atribui causa a preço |
-| R16 | H | Quebra candidata em `ponto_candidato_quebra` | "Há indício exploratório de mudança de regime em {ano} (não confirmado)." | `quebra_confirmada` falso é o padrão; texto afirmativo de quebra fica **proibido** por teste |
+| R16 | H | Quebra candidata em `ponto_candidato_quebra` (hoje fixo em 2013; a Task 15 propõe a varredura supF) | "Há indício exploratório de mudança de regime em {ano} (não confirmado)." | `quebra_confirmada` falso é o padrão; texto afirmativo de quebra fica **proibido** por teste |
 
 Teste automatizado obrigatório: nenhuma saída contém verbos proibidos ("falhou", "culpa", "causou", "garante"); cada regra tem pelo menos um teste por caso-limite; textos dourados em arquivo (golden) para detectar mudança involuntária de vocabulário.
 
@@ -214,7 +216,7 @@ Verde x âmbar é o par escolhido na Etapa 2 por separar nos três tipos de dalt
 - **Carregando:** esqueleto com o formato do gráfico e `aria-busy`; nunca spinner infinito; após 8 s mostra "ainda carregando" e botão de repetir.
 - **Vazio:** "Nenhum registro atende a esta combinação de filtros." + sugestão do que afrouxar (primeiro filtro que, removido, devolve resultado; o backend calcula).
 - **Erro de carga:** mensagem em linguagem simples, código técnico recolhido, botão "tentar de novo"; telas de PAM seguem funcionando se só o mercado falhou.
-- **Dado ausente:** hachura cinza + legenda "sem informação (supressão do IBGE)".
+- **Dado ausente:** hachura cinza + legenda "sem informação (dado não divulgado pelo IBGE)". Zero registrado (`sem_producao`) é plotado como 0, não como ausente.
 - **Base pequena e defasagem:** selo "base pequena" e faixa de defasagem.
 
 **Acessibilidade proporcional (usuário único, mas avaliador e arguição olham):**
@@ -268,7 +270,7 @@ Regra de dependência (ADR 0003): `domain` não conhece `apps/`. A API importa `
 - OpenAPI-first: `apps/api` publica `/openapi.json`; `openapi-typescript` gera os tipos do front; CI falha se `openapi.json` versionado diverge do gerado.
 - Endpoints (v1, todos GET para serem linkáveis e cacheáveis): `/api/v1/saude`, `/fontes`, `/territorios`, `/indicadores/panorama`, `/indicadores/serie`, `/indicadores/ranking`, `/indicadores/mix`, `/municipios`, `/insights`, `/prioridades`, `/cenarios/simular`, `/mercado/{cambio,acucar,paises,cot}`, `/metodologia`.
 - DuckDB: conexão somente leitura, `CREATE VIEW` sobre `read_parquet('data/processed/*.parquet')`, **sempre** `con.execute(sql, [params])`; identificadores (nome de coluna/indicador) só via lista branca. Indicadores como views SQL (produtividade = `SUM(q)/NULLIF(SUM(area),0)`), testados contra os valores auditados do DAX (PB 2023: 64,69 t/ha; -16,96%; +3,41%; 0,90%; share açúcar 27,54%).
-- Observação verificada nos parquet: as colunas de **desvio e participação não estão** nos fatos por nível (só produtividade, tendência, oscilação, `p_chow`, etc.), então o app precisa calculá-las (Task 5).
+- Observação verificada nos parquet: as colunas de **desvio e participação não estão** nos fatos por nível (só produtividade, tendência, oscilação, `p_chow`, etc.), então o app precisa calculá-las (Task 5). A coluna `tendencia_t_ha` é uma média móvel centrada de 3 anos (nível suavizado, vazia em 2003 e 2023), não uma taxa; a inclinação em t/ha/ano com erro-padrão e intervalo ainda não existe na gold e entra na Task 5, para sustentar a R07 (Task 10).
 
 ### 7.4 Dados internacionais (camada de serviço)
 
@@ -326,7 +328,7 @@ Recomendação: **backend, Python, funções puras** em `src/canavis/domain/regr
 | Extra (até) | Plano | Issues |
 |---|---|---|
 | 1. Gráficos não convencionais (0,5) | (a) **Coroplético** de produtividade por UF e microrregiões da PB: "onde a PB está no mapa?" (esboço A da Etapa 1); (b) **slope chart** PB vs pares do tier, 2013 -> 2023: "quem ganhou ou perdeu posição desde a inversão de regime?"; (c) **múltiplos pequenos** de microrregiões: "quais ganham ou perdem de forma consistente?". Bump chart só se sobrar tempo | Task 3, Task 14 |
-| 2. Modelagem estatística (0,5) | **Defensável:** tendência robusta (Theil-Sen ou OLS com erro-padrão) com intervalo e classificação sobe/estável/cai; `p_chow` + FDR já feitos; clusterização dos tiers interpretada. **Exploratório:** sensibilidade do share de açúcar ao preço do açúcar em R$ (Spearman e regressão simples com IC por bootstrap, n da ordem de 20 safras). **Não fazer:** projeção de produtividade. Resultado nulo é reportado como nulo | Task 15 |
+| 2. Modelagem estatística (0,5) | **Defensável:** tendência robusta (Theil-Sen ou OLS com erro-padrão) com intervalo e classificação sobe/estável/cai (a inclinação com intervalo entra na Task 5 por alimentar a R07; a Task 15 acrescenta o Theil-Sen por microrregião e a varredura supF); `p_chow` + FDR já feitos; clusterização dos tiers interpretada. **Exploratório:** sensibilidade do share de açúcar ao preço do açúcar em R$ (Spearman e regressão simples com IC por bootstrap, n da ordem de 20 safras). **Não fazer:** projeção de produtividade. Resultado nulo é reportado como nulo | Task 15 |
 | 3. Banco de dados (0,5) | DuckDB com views sobre parquet e `execute(sql, params)` | Task 6 |
 | 4. API (0,5) | FastAPI própria com OpenAPI **e** consumo de APIs externas (BCB SGS, FRED, World Bank, USDA) | Task 4, Task 6, Task 7 |
 | 5. Publicado (0,5) | Hugging Face Spaces (Docker) | Task 4, Task 16 |
@@ -355,8 +357,8 @@ Quatro marcos. Sem o prazo real, estão em ordem e horas. O backlog tem **20 iss
 
 | # | Risco | Impacto | Mitigação |
 |---|---|---|---|
-| R1 | Prazo no Moodle desconhecido | Cronograma e bônus de 72 h | Perguntar já (Task 1); datas internas relativas |
-| R2 | Professor não confirmar a stack por escrito (o enunciado exige aprovação para alternativa ao Dash) | Nota | Task 1 é a primeira issue; plano B: Dash só sobre o mesmo backend, o que custaria o front |
+| R1 | ~~Prazo no Moodle desconhecido~~ **Resolvido:** 01/12/2026; meta interna 27/11/2026 | Cronograma e bônus de 72 h | Datas dos marcos no GitHub e no README |
+| R2 | ~~Professor não confirmar a stack por escrito~~ **Resolvido:** stack confirmada (ADR 0013) | Nota | Task 1 é a primeira issue; plano B: Dash só sobre o mesmo backend, o que custaria o front |
 | R3 | URL não reabre a mesma visão | Trava em 3,0 | URL única fonte de verdade, e2e em CI desde M2 |
 | R4 | "Sobe com um comando" falha em outra máquina | Trava em 3,0 (engenharia) | Teste do compose em máquina limpa (Task 4); CI sobe o compose |
 | R5 | Textos soam autoritativos demais | Rubrica de textos | Limiares, vocabulário, golden files, Task 10 |
@@ -369,13 +371,14 @@ Quatro marcos. Sem o prazo real, estão em ordem e horas. O backlog tem **20 iss
 | R12 | Escopo infla | Atraso | Marcos com corte: cortar Task 14/Task 14, Task 15 e Task 12 antes de tocar nos obrigatórios |
 | R13 | Tensão persona x mix (Etapa 1 descartou o enquadramento 2) | Coerência da narrativa | Narrativa: sinal de mercado como contexto; ação "levar ao comercial" |
 | R14 | Licença do CEPEA (não comercial) | Ética/atribuição | Fora do núcleo; só com atribuição |
+| R15 | Dado municipal pouco informativo (produtividade com poucos valores distintos; 140 de 223 municípios com zero) e tendência sem evidência (IC inclui zero na PB) | Textos que sugerem ranking ou tendência sem lastro | `/municipios` ordenada por área; classe "estável" quando o IC inclui zero; `jornada-e-rotas.md` seção 7 |
 | R15 | Dado anual PAM vs "trimestre" do enunciado | Teste de aceitação | Tarefa em termos de safra/ano: "3 casos prioritários da safra" |
 
 ---
 
 ## 11. Perguntas em aberto
 
-Para o professor: **P1** prazo exato e hora no Moodle; **P2** confirmação por escrito de React + TypeScript + FastAPI (alternativa ao Dash); **P3** o link publicado pode ser em hospedagem gratuita que dorme? **P4** o zip pode conter a imagem Docker ou basta o Dockerfile e o compose? **P5** os dados internacionais em snapshot versionado contam como "dados ou script de obtenção"?
+Para o professor: **P1** ~~prazo exato e hora no Moodle~~ (resolvido: 01/12/2026; confirmar a hora); **P2** ~~confirmação de React + TypeScript + FastAPI~~ (resolvido); **P3** o link publicado pode ser em hospedagem gratuita que dorme? **P4** o zip pode conter a imagem Docker ou basta o Dockerfile e o compose? **P5** os dados internacionais em snapshot versionado contam como "dados ou script de obtenção"?
 
 Para o demandante: **P6** limiares de relevância (desvio, variação, tendência); **P7** unidade de tempo preferida (safra x ano civil); **P8** se aceita o sinal de mercado como contexto; **P9** disponibilidade para o teste de aceitação; **P10** quem fala com o comercial sobre mix.
 
