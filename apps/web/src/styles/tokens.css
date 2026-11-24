@@ -1,0 +1,131 @@
+/*
+ * Tokens de design do CanaVis (Task 3, ADR 0017).
+ * Fonte da verdade das cores: docs/entrega-etapa3/design-system.md.
+ * Contrastes medidos por scripts/contraste_paleta.py (WCAG 2.1 AA).
+ * Tailwind v4: os tokens abaixo são expostos em @theme, então geram classes
+ * como bg-marca, text-texto, border-grade.
+ */
+@theme {
+  /* Neutros */
+  --color-fundo: #f2f2f2;
+  --color-superficie: #ffffff;
+  --color-texto: #1a1a1a;
+  --color-texto-secundario: #50565e;
+  --color-grade: #d5d9de; /* decorativa; nunca única pista de informação */
+  --color-eixo: #7c8691; /* eixos e contornos de forma (3,3:1) */
+
+  /* Dado: marca e divergência */
+  --color-marca: #2f6b3c; /* PB, acima da referência (5,7:1) */
+  --color-abaixo: #c26f00; /* abaixo da referência, só forma (3,4:1) */
+  --color-abaixo-texto: #8a4b00; /* versão para texto (6,1:1) */
+
+  /* Dado: séries e categorias */
+  --color-serie-2: #5e9170; /* série secundária (3,3:1), só forma */
+  --color-acucar: #3a6ea5; /* açúcar (4,7:1) */
+  --color-acucar-texto: #2b5580; /* texto (6,9:1) */
+  --color-etanol: #a8641a; /* etanol (4,2:1), sempre com hachura */
+  --color-neutro-dado: #6b7785; /* demais regiões, linha de referência */
+  --color-neutro-dado-texto: #566170; /* texto (5,6:1) */
+
+  /* Ausente != zero */
+  --color-ausente: #6b7785; /* sempre com hachura (ver .hachura-ausente) */
+
+  /* Rampa sequencial do coroplético (luminância decrescente) */
+  --color-rampa-1: #e3efe5;
+  --color-rampa-2: #b5d3bb;
+  --color-rampa-3: #7ba886;
+  --color-rampa-4: #4a8057;
+  --color-rampa-5: #2f6b3c;
+  --color-rampa-6: #1f4d2b;
+  --color-contorno-area: #50565e; /* 1 px em toda área da rampa */
+
+  /* Estado e interação */
+  --color-foco: #1d4ed8;
+  --color-cenario: #1d4ed8; /* borda e selo de cenário ativo; não é cor de dado */
+
+  /* Tipografia (auto-hospedada via Fontsource) */
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
+  --text-sm: 0.875rem; /* 14 px */
+  --text-base: 1rem; /* 16 px */
+  --text-lg: 1.25rem; /* 20 px */
+  --text-xl: 1.75rem; /* 28 px */
+
+  /* Espaçamento: base de 4 px */
+  --spacing: 0.25rem;
+
+  /* Raios e sombras */
+  --radius-card: 0.5rem;
+  --shadow-card: 0 1px 2px rgb(26 26 26 / 0.08);
+}
+
+:root {
+  --foco-anel: 3px solid var(--color-foco);
+  --foco-deslocamento: 2px;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+/* Números sempre tabulares */
+.num,
+table,
+[data-kpi] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bloco de leitura (descrever, destacar, sugerir) */
+.leitura {
+  font-family: var(--font-serif);
+  background: var(--color-superficie);
+  border-left: 4px solid var(--color-marca);
+  border-radius: var(--radius-card);
+  padding: calc(var(--spacing) * 4);
+}
+
+/* Cenário ativo: borda e selo, não cor de dado */
+[data-cenario="ativo"] {
+  outline: 2px solid var(--color-cenario);
+  outline-offset: 2px;
+}
+
+/* Foco visível em tudo que é interativo */
+:focus-visible {
+  outline: var(--foco-anel);
+  outline-offset: var(--foco-deslocamento);
+}
+
+/* Ausente: cinza com hachura diagonal (nunca entra na rampa de dados) */
+.hachura-ausente {
+  background-color: var(--color-ausente);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    rgb(255 255 255 / 0.55) 4px 6px
+  );
+}
+
+/* Etanol: ocre com hachura, para não depender só da cor */
+.hachura-etanol {
+  background-color: var(--color-etanol);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 4px,
+    rgb(255 255 255 / 0.45) 4px 6px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
