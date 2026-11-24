@@ -120,14 +120,20 @@ coexistem, a série da PB tem rótulo direto e a outra usa linha tracejada. Dalt
 dos testes; a informação nunca depende só da cor (direção da barra em relação ao zero,
 rótulo direto, hachura).
 
-## 5. Ausente não é zero
+## 5. Ausente não é zero, e zero real não é ausente
 
-- Preenchimento cinza `#6B7785` com **hachura diagonal** (classe `hachura-ausente` nos tokens).
-- Fora da rampa de dados: ausente nunca recebe um degrau da rampa nem o valor 0.
-- Legenda fixa: "Sem informação (supressão do IBGE)".
-- Em tabela, a célula mostra "sem informação" em texto, nunca "0" nem célula em branco.
-- Em gráfico de linha, a série tem lacuna (não interpola).
-- Médias e totais ignoram os ausentes e dizem quantos foram ignorados (regra R04).
+A PAM tem dois casos distintos (ADR 0008) e cada um tem tratamento próprio:
+
+| Caso | Significado | Tratamento visual | Texto |
+|---|---|---|---|
+| `suprimido` | Dado não divulgado pelo IBGE | Cinza `#6B7785` com **hachura diagonal** (`hachura-ausente`); fora da rampa; lacuna em linhas | "Sem informação (dado não divulgado pelo IBGE)" |
+| `sem_producao` | Zero registrado: o município não produz cana | Plotado como 0 (barra de comprimento zero, ponto em 0). No mapa: preenchimento `superficie` (`#FFFFFF`) com contorno, fora da rampa | "Sem produção de cana (zero registrado)" |
+
+- Em tabela, suprimido mostra "sem informação" e zero real mostra "0" ou "sem produção"; nunca
+  célula em branco.
+- Médias e totais ignoram os suprimidos e dizem quantos foram ignorados (regra R04).
+- Em 2023 na PB: 82 municípios produzem, 140 têm zero registrado e 1 está suprimido. Chamar os
+  140 de "supressão" seria errado.
 
 ## 6. Estados e microcopy (pt-BR)
 
@@ -140,7 +146,10 @@ Proposta para aprovação do time.
 | Vazio | Mostra o primeiro filtro que, removido, devolve resultado (calculado no backend) | "Nenhum registro atende a esta combinação de filtros." + "Tente: {remover o grupo (tier)}." Botão: "Aplicar sugestão" |
 | Erro de carga | Linguagem simples, código técnico recolhido. Telas de PAM seguem funcionando se só o mercado falhou | "Não foi possível carregar estes dados." Detalhe recolhido: "Detalhes técnicos". Botão: "Tentar de novo" |
 | Fonte fora do ar | Selo no card, sem derrubar a tela | "Fonte fora do ar. Mostrando dados de {data}." |
-| Dado ausente | Hachura cinza + legenda | "Sem informação (supressão do IBGE)." |
+| Dado suprimido | Hachura cinza + legenda | "Sem informação (dado não divulgado pelo IBGE)." |
+| Sem produção | Zero plotado; no mapa, branco com contorno | "Sem produção de cana (zero registrado)." |
+| Produtividade municipal | Aviso junto à coluna | "Valores municipais tendem a se repetir; use a área para comparar municípios." |
+| Tendência sem evidência | Selo no gráfico e na leitura | "Estável: o intervalo de confiança inclui zero." |
 | Base pequena | Selo no gráfico e na leitura | "Base pequena: {n} municípios com dado." |
 | Defasagem | Faixa no topo da tela, não só no rodapé | "Atenção: PAM vai até {ano}; CONAB até {safra} (estimativa)." |
 | Recusa por cobertura | Sem ação sugerida | "Dados insuficientes para recomendar nesta combinação ({motivo})." |
@@ -181,10 +190,10 @@ mensagem. Biblioteca: Observable Plot (ADR 0017).
 - **Pergunta:** "Quais microrregiões ganham ou perdem de forma consistente?"
 - **Codificação:** uma série curta por microrregião, mesmos eixos em todas (escala comum, para
   comparar), linha `marca`, referência da PB em `neutro-dado` tracejada. Ausente com lacuna.
-- **Ordenação:** por tendência (maior queda primeiro), nunca alfabética.
+- **Ordenação:** pela inclinação (menor primeiro), nunca alfabética. Só rotula "queda" quando o intervalo exclui zero.
 - **Interação:** clique abre `/microrregiao/:cod`.
-- **Tabela equivalente:** microrregião, tendência (t/ha/ano), último valor, anos com dado.
-- **Texto alternativo:** "{n} microrregiões; {k} em queda na janela de {j} anos."
+- **Tabela equivalente:** microrregião, inclinação com intervalo (t/ha/ano), último valor, anos com dado.
+- **Texto alternativo:** "{n} microrregiões; {k} com queda confirmada pelo intervalo na janela de {j} anos."
 - **Limite:** série curta e com ausentes; a leitura traz o número de anos com dado.
 
 ## 8. Tipografia e espaçamento

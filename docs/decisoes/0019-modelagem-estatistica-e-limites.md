@@ -12,3 +12,10 @@
 - **Fora de escopo:** projeção de produtividade. A série tem 21 pontos e não há quebra
   confirmada; projetar seria confiança fabricada.
 - Resultado nulo é reportado como nulo. Texto afirmativo de quebra é proibido por teste.
+- **Leitura da tendência.** A média por fase (2003–12 e 2013–22) e o destaque de 2023 são a
+  leitura principal; a inclinação é apoio. A classe é "sobe" ou "cai" só quando o IC 95% exclui
+  zero, e "estável" nos demais casos. O texto avisa quando a classe muda ao retirar o último ano.
+  Evidência: `scripts/analise_tendencia_base_municipal.py`.
+- **Produtividade municipal** não entra em ranking: tem poucos valores distintos (13 entre 82
+  municípios em 2023) e a quantidade deriva dela. A comparação entre municípios usa a área colhida.
+

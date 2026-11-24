@@ -50,3 +50,13 @@ Os indicadores de longo prazo que serão minerados na fase seguinte nascem no n�
 microrregião e sobre janela recente. Isso descarta, desde já, a ideia de um ranking municipal
 de tendência — seria indefensável com 62% de supressão. Falhar aqui é barato; falhar na Etapa 3
 seria caro.
+
+## Errata (Etapa 3)
+A revisão da jornada (`docs/entrega-etapa3/jornada-e-rotas.md`, seção 7) corrigiu dois pontos
+desta decisão. A evidência original acima fica preservada.
+- **Ausentes municipais.** Os 62% de rendimento ausente no município misturam zero real
+  (`sem_producao`, ADR 0008) e dado suprimido. Em 2003–2023 só 26 linhas são `suprimido`;
+  2.860 são zero registrado. Chamar tudo de supressão do IBGE está errado.
+- **Inclinação de 2013–2023.** O valor de +666 kg/ha por ano depende de 2023: sem esse ano a
+  inclinação de 2013–2022 é +302 kg/ha por ano, e o IC 95% das janelas de 5 e 10 anos inclui zero.
+
