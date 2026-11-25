@@ -3,7 +3,7 @@
 Task 3 (issue #27). Tokens em `apps/web/src/styles/tokens.css`. Medições reproduzíveis com
 `python scripts/contraste_paleta.py` (WCAG 2.1 e simulação de daltonismo, sem dependências).
 Parte da paleta da Etapa 2 (`docs/entrega-etapa2/paleta-acessibilidade.md`).
-**Status:** rascunho para aprovação do time. A microcopy da seção 6 ainda precisa de "ok" do time.
+**Status:** microcopy da seção 6 aprovada pelo time (24/11/2026). Pendente: uso dos tokens no front (Task 4).
 
 ## 1. O que mudou em relação à Etapa 2, e por quê
 
@@ -137,7 +137,7 @@ A PAM tem dois casos distintos (ADR 0008) e cada um tem tratamento próprio:
 
 ## 6. Estados e microcopy (pt-BR)
 
-Proposta para aprovação do time.
+Aprovada pelo time em 24/11/2026.
 
 | Estado | Comportamento | Texto |
 |---|---|---|
@@ -228,7 +228,6 @@ mensagem. Biblioteca: Observable Plot (ADR 0017).
 
 ## 10. Pendências
 
-- Aprovação da microcopy pelo time (critério de aceitação).
 - O front ainda não existe (Task 4 cria `apps/web`); "tokens usados pelo front" fecha lá.
   O arquivo `tokens.css` assume Tailwind v4 (`@theme`) e deve ser importado no CSS de entrada.
 - Atualizar o tema do Power BI, se o time quiser coerência com os novos hex.
