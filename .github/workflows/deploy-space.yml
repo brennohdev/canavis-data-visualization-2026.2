@@ -27,16 +27,14 @@ jobs:
             echo "$grandes"
             exit 1
           fi
+      - uses: astral-sh/setup-uv@v10.4.0
+        with:
+          version: "0.11.3"
       - name: Enviar ao Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_SPACE: ${{ vars.HF_SPACE }}
         run: |
           test -n "$HF_TOKEN" && test -n "$HF_SPACE"
-          cd staging
-          git init -q -b main
-          git config user.name "canavis-deploy"
-          git config user.email "canavis-deploy@users.noreply.github.com"
-          git add -A
-          git commit -q -m "deploy: ${GITHUB_SHA}"
-          git push --force "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main
+          uvx --from huggingface_hub==2.5.0 hf upload "$HF_SPACE" staging . \
+            --repo-type space --delete "*" --commit-message "deploy: ${GITHUB_SHA}"
