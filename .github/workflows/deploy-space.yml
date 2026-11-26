@@ -13,11 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Montar a pasta do Space
+      - name: Montar a pasta do Space só com o que a imagem usa
         run: |
           mkdir staging
-          git archive HEAD | tar -x -C staging
+          git archive HEAD Dockerfile .dockerignore pyproject.toml uv.lock README.md \
+            src apps/api apps/web data/processed | tar -x -C staging
           cp deploy/hf-space/README.md staging/README.md
+      - name: Recusar arquivo acima do limite de 10 MiB do Hugging Face
+        run: |
+          grandes=$(find staging -type f -size +10M)
+          if [ -n "$grandes" ]; then
+            echo "Arquivos acima de 10 MiB, que o Space recusa:"
+            echo "$grandes"
+            exit 1
+          fi
       - name: Enviar ao Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
