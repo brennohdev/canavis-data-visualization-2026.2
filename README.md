@@ -99,3 +99,10 @@ so the submission lands at least 72 h early for the early-delivery bonus).
 | M2 — Analytical core | Tasks 5–9 | 2026-11-25 |
 | M3 — Texts, scenarios and extras | Tasks 10–15 | 2026-11-26 |
 | M4 — Quality and delivery | Tasks 16–20 | 2026-11-27 |
+
+## Web application (Stage 3)
+
+The React + FastAPI application lives in `apps/`. One command runs it: `docker compose up --build`,
+then open <http://localhost:7860/uf/PB?ano=2021>. Instructions (in Portuguese), environment
+variables, deployment to Hugging Face Spaces and the clean-machine checklist are in
+[docs/entrega-etapa3/como-executar.md](docs/entrega-etapa3/como-executar.md).
