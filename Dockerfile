@@ -1,5 +1,5 @@
 # Imagem única: o Node compila o React; o Python serve a API e o build estático.
-# Compatível com Hugging Face Spaces (SDK Docker): porta 7860 e usuário UID 1000.
+# Porta 7860 e usuário sem privilégio (UID 1000). Publicado no Render (ADR 0018).
 
 FROM node:24.13.0-slim AS web
 RUN corepack enable
@@ -27,8 +27,7 @@ COPY --from=web /app/apps/web/dist ./static
 
 ENV PATH="/app/.venv/bin:$PATH" \
     CANAVIS_STATIC_DIR=/app/static \
-    CANAVIS_DATA_DIR=/app/data/processed \
-    CANAVIS_PORT=7860
+    CANAVIS_DATA_DIR=/app/data/processed
 
 RUN useradd --create-home --uid 1000 app && chown -R app /app
 USER app
