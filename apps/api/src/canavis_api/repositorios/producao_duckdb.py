@@ -9,14 +9,13 @@ from canavis_api.dominio.territorio import Uf
 
 ARQUIVOS_OBRIGATORIOS = ("fato_producao_uf.parquet", "dim_territorio.parquet")
 
-_SQL = """
-SELECT f.territorio_id, d.nome_territorio, f.ano_referencia,
-       f.produtividade_t_ha, f.quantidade_produzida_t, f.area_colhida_ha
-FROM read_parquet(?) AS f
-JOIN read_parquet(?) AS d ON d.territorio_id = f.territorio_id
-WHERE d.nivel_territorial = 'uf' AND d.cod_uf = ? AND f.ano_referencia = ?
-"""
-
+_SQL = (
+    "SELECT f.territorio_id, d.nome_territorio, f.ano_referencia, "
+    "f.produtividade_t_ha, f.quantidade_produzida_t, f.area_colhida_ha "
+    "FROM read_parquet(?) AS f "
+    "JOIN read_parquet(?) AS d ON d.territorio_id = f.territorio_id "
+    "WHERE d.nivel_territorial = 'uf' AND d.cod_uf = ? AND f.ano_referencia = ?"
+)
 _log = logging.getLogger(__name__)
 
 
