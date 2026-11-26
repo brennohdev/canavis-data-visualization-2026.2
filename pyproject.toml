@@ -19,7 +19,14 @@ notebooks = [
     "statsmodels>=0.14.0",
     "scipy>=1.11.0",
 ]
-dev = ["pytest>=8.3.0"]
+# API da Etapa 3 (FastAPI + DuckDB). Fica fora de `dependencies` para não
+# contaminar o núcleo do pipeline (ADR 0003, ADR 0018).
+api = [
+    "fastapi==0.165.0",
+    "uvicorn[standard]==0.54.0",
+    "duckdb==2.0.1",
+]
+dev = ["pytest>=8.3.0", "ruff==0.17.6", "httpx==0.29.0"]
 
 [project.scripts]
 canavis-pipeline = "canavis.pipeline.runner:main"
@@ -29,8 +36,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/canavis"]
+packages = ["src/canavis", "apps/api/src/canavis_api"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
+pythonpath = ["src", "apps/api/src"]
+testpaths = ["tests", "apps/api/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "apps/api/src"]
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+# Regras mínimas (erros de sintaxe e pyflakes): não reescreve o código legado do pipeline.
+select = ["E9", "F"]

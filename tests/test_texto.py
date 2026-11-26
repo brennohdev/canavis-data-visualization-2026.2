@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 
 from canavis.domain import texto
 
