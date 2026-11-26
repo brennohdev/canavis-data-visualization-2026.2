@@ -26,3 +26,4 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0018](0018-deploy-e-reprodutibilidade.md) | Deploy e reprodutibilidade | Proposta |
 | [0019](0019-modelagem-estatistica-e-limites.md) | Modelagem estatística e seus limites | Proposta |
 | [0020](0020-cenarios-sem-projecao.md) | Parâmetros de cenário sem projeção | Proposta |
+| [0021](0021-arquitetura-em-camadas-da-api.md) | Arquitetura em camadas da API (domínio, aplicação, apresentação, repositórios) | Aceita |

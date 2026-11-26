@@ -3,22 +3,19 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from canavis_api.main import create_app
-from canavis_api.settings import get_settings
+from canavis_api.composicao import create_app
+from canavis_api.settings import Settings
 
 RAIZ = Path(__file__).resolve().parents[3]
 
 
 @pytest.fixture
-def cliente(monkeypatch):
+def cliente():
     def _criar(data_dir: Path = RAIZ / "data" / "processed", static_dir: Path | None = None):
-        monkeypatch.setenv("CANAVIS_DATA_DIR", str(data_dir))
-        monkeypatch.setenv("CANAVIS_STATIC_DIR", str(static_dir or data_dir / "sem-static"))
-        get_settings.cache_clear()
-        return TestClient(create_app())
+        settings = Settings(data_dir=data_dir, static_dir=static_dir or data_dir / "sem-static")
+        return TestClient(create_app(settings))
 
-    yield _criar
-    get_settings.cache_clear()
+    return _criar
 
 
 def test_saude_ok(cliente):
@@ -72,3 +69,28 @@ def test_fallback_spa(cliente, tmp_path):
     r = c.get("/api/v1/inexistente")
     assert r.status_code == 404
     assert r.headers["content-type"].startswith("application/json")
+
+
+def test_parquet_corrompido_503(cliente, tmp_path):
+    (tmp_path / "fato_producao_uf.parquet").write_text("lixo")
+    (tmp_path / "dim_territorio.parquet").write_text("lixo")
+    r = cliente(data_dir=tmp_path).get("/api/v1/uf/PB/producao?ano=2021")
+    assert r.status_code == 503
+    assert str(tmp_path) not in r.text
+
+
+def test_openapi_descreve_producao_uf(cliente):
+    esquema = cliente().get("/openapi.json").json()["components"]["schemas"]["ProducaoUFResposta"]
+    assert set(esquema["properties"]) == {
+        "sigla",
+        "territorio_id",
+        "nome",
+        "ano",
+        "produtividade_t_ha",
+        "quantidade_produzida_t",
+        "area_colhida_ha",
+    }
+
+
+def test_docs_200(cliente):
+    assert cliente().get("/docs").status_code == 200

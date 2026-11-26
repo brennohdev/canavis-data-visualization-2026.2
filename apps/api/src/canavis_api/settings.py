@@ -1,6 +1,6 @@
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 
 
@@ -8,16 +8,11 @@ from pathlib import Path
 class Settings:
     data_dir: Path
     static_dir: Path
-    port: int
-    log_level: str
 
-
-@lru_cache
-def get_settings() -> Settings:
-    porta = os.environ.get("CANAVIS_PORT") or os.environ.get("PORT") or "7860"
-    return Settings(
-        data_dir=Path(os.environ.get("CANAVIS_DATA_DIR", "data/processed")),
-        static_dir=Path(os.environ.get("CANAVIS_STATIC_DIR", "apps/web/dist")),
-        port=int(porta),
-        log_level=os.environ.get("CANAVIS_LOG_LEVEL", "info"),
-    )
+    @classmethod
+    def from_env(cls, env: Mapping[str, str] | None = None) -> "Settings":
+        fonte = os.environ if env is None else env
+        return cls(
+            data_dir=Path(fonte.get("CANAVIS_DATA_DIR", "data/processed")),
+            static_dir=Path(fonte.get("CANAVIS_STATIC_DIR", "apps/web/dist")),
+        )
