@@ -1,5 +1,3 @@
-"""Consultas DuckDB sobre os parquet da camada gold (somente leitura)."""
-
 from dataclasses import dataclass
 from pathlib import Path
 

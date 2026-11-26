@@ -1,5 +1,3 @@
-"""Aplicação FastAPI: API em /api/v1 e, se existir, o build estático do React."""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,7 +17,6 @@ def create_app() -> FastAPI:
         if (static_dir / "assets").is_dir():
             app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
 
-        # Fallback do SPA: rotas do React (ex.: /uf/PB?ano=2021) abrem direto.
         @app.get("/{caminho:path}", include_in_schema=False)
         def spa(caminho: str) -> FileResponse:
             if caminho == "api" or caminho.startswith("api/"):
