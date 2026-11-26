@@ -4,7 +4,6 @@ export const ANO_MIN = 2003;
 export const ANO_MAX = 2023;
 export const ANO_PADRAO = 2021;
 
-// Ano inválido ou ausente na URL cai no padrão em vez de quebrar a tela.
 const anoSchema = z.coerce.number().int().min(ANO_MIN).max(ANO_MAX).catch(ANO_PADRAO);
 
 export const buscaUfSchema = z.object({ ano: z.preprocess((v) => v ?? ANO_PADRAO, anoSchema) });

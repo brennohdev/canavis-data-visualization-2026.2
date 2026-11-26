@@ -1,8 +1,6 @@
 import type { ProducaoUF } from "./api";
 import { formatarUmaCasa } from "./formato";
 
-// Texto dinâmico simples: só descreve, sem verbos de causa.
-// A engine de regras de texto é da Task 10.
 export function textoProducao(p: ProducaoUF): string {
   if (p.quantidade_produzida_t === null || p.produtividade_t_ha === null) {
     return `Em ${p.ano}, não há dado de produção de cana para ${p.nome}.`;

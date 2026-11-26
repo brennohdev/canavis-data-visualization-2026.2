@@ -1,11 +1,11 @@
 import type { ComponentProps } from "react";
-import { cn } from "@/lib/utils";
 
-// Componente no padrão shadcn/ui, com as cores vindas de tokens.css.
-export function Card({ className, ...props }: ComponentProps<"div">) {
+export type CardProps = Omit<ComponentProps<"div">, "className" | "style">;
+
+export function Card(props: CardProps) {
   return (
     <div
-      className={cn("rounded-(--radius-card) bg-superficie p-6 shadow-(--shadow-card)", className)}
+      className="space-y-2 rounded-(--radius-card) bg-superficie p-6 shadow-(--shadow-card)"
       {...props}
     />
   );
