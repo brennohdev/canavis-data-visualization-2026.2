@@ -1,0 +1,14 @@
+services:
+  canavis:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      - path: .env
+        required: false
+    # Em desenvolvimento, para ler parquet novos sem rebuild, crie um
+    # compose.override.yaml com:
+    #   services:
+    #     canavis:
+    #       volumes:
+    #         - ./data/processed:/app/data/processed:ro
