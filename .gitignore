@@ -27,3 +27,10 @@ data/**/*.csv
 
 # Artefatos de workflow de agentes (review.json, pr.json, etc.)
 .agents/
+
+# Node e artefatos do web
+node_modules/
+apps/web/dist/
+
+# Configuração local (nunca versionar)
+.env

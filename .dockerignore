@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+.env
+.agents
+.worktrees
+**/node_modules
+apps/web/dist
+data/raw
+data/interim
+notebooks
+docs
+powerbi
+wireframes
+**/__pycache__
+.ruff_cache
+.pytest_cache

@@ -3,7 +3,8 @@
 Task 3 (issue #27). Tokens em `apps/web/src/styles/tokens.css`. Medições reproduzíveis com
 `python scripts/contraste_paleta.py` (WCAG 2.1 e simulação de daltonismo, sem dependências).
 Parte da paleta da Etapa 2 (`docs/entrega-etapa2/paleta-acessibilidade.md`).
-**Status:** microcopy da seção 6 aprovada pelo time (24/11/2026). Pendente: uso dos tokens no front (Task 4).
+**Status:** microcopy da seção 6 aprovada pelo time (24/11/2026). O front (`apps/web`, Task 4) usa os tokens
+via mini design system: ver `catalogo-componentes.md` e `conformidade-design-system.md`.
 
 ## 1. O que mudou em relação à Etapa 2, e por quê
 
@@ -228,6 +229,6 @@ mensagem. Biblioteca: Observable Plot (ADR 0017).
 
 ## 10. Pendências
 
-- O front ainda não existe (Task 4 cria `apps/web`); "tokens usados pelo front" fecha lá.
-  O arquivo `tokens.css` assume Tailwind v4 (`@theme`) e deve ser importado no CSS de entrada.
+- O front usa os tokens desde a Task 4. `tokens.css` é importado no CSS de entrada, os componentes
+  estão em `catalogo-componentes.md` e o estado de cada regra em `conformidade-design-system.md`.
 - Atualizar o tema do Power BI, se o time quiser coerência com os novos hex.
