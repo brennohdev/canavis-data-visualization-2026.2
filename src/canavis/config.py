@@ -74,3 +74,44 @@ def source_config(key: str) -> dict:
     if key not in sources:
         raise KeyError(f"Fonte '{key}' não encontrada em sources.yaml")
     return sources[key]
+
+
+_CHAVES_INDICADOR = (
+    "id", "nome", "definicao", "formula", "unidade", "sentido", "fonte", "niveis",
+    "funcao", "tratamento_ausencia", "limitacoes",
+)
+_SENTIDOS = {"maior_melhor", "menor_melhor", "neutro"}
+_CHAVES_PARAMETRO = ("valor", "unidade", "status", "origem")
+
+
+def _validar_indicadores(bruto: dict) -> dict:
+    for chave in ("versao", "parametros", "indicadores"):
+        if chave not in bruto:
+            raise ValueError(f"Chave '{chave}' ausente em indicadores.yaml")
+    for nome, parametro in bruto["parametros"].items():
+        faltantes = [c for c in _CHAVES_PARAMETRO if c not in parametro]
+        if faltantes:
+            raise ValueError(f"Parâmetro '{nome}' sem as chaves {faltantes}")
+    ids = set()
+    for indicador in bruto["indicadores"]:
+        rotulo = indicador.get("id", "?")
+        faltantes = [c for c in _CHAVES_INDICADOR if c not in indicador]
+        if faltantes:
+            raise ValueError(f"Indicador '{rotulo}' sem as chaves {faltantes}")
+        if indicador["sentido"] not in _SENTIDOS:
+            raise ValueError(f"Indicador '{rotulo}' com sentido inválido: {indicador['sentido']!r}")
+        if not indicador["limitacoes"]:
+            raise ValueError(f"Indicador '{rotulo}' sem limitações")
+        if rotulo in ids:
+            raise ValueError(f"Indicador '{rotulo}' duplicado")
+        ids.add(rotulo)
+    return bruto
+
+
+def carregar_indicadores_de(path: Path) -> dict:
+    return _validar_indicadores(_read_yaml(path))
+
+
+@lru_cache
+def load_indicadores() -> dict:
+    return carregar_indicadores_de(_CONFIG_DIR / "indicadores.yaml")

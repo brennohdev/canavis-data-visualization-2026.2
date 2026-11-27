@@ -270,7 +270,7 @@ Regra de dependência (ADR 0003): `domain` não conhece `apps/`. A API importa `
 - OpenAPI-first: `apps/api` publica `/openapi.json`; `openapi-typescript` gera os tipos do front; CI falha se `openapi.json` versionado diverge do gerado.
 - Endpoints (v1, todos GET para serem linkáveis e cacheáveis): `/api/v1/saude`, `/fontes`, `/territorios`, `/indicadores/panorama`, `/indicadores/serie`, `/indicadores/ranking`, `/indicadores/mix`, `/municipios`, `/insights`, `/prioridades`, `/cenarios/simular`, `/mercado/{cambio,acucar,paises,cot}`, `/metodologia`.
 - DuckDB: conexão somente leitura, `CREATE VIEW` sobre `read_parquet('data/processed/*.parquet')`, **sempre** `con.execute(sql, [params])`; identificadores (nome de coluna/indicador) só via lista branca. Indicadores como views SQL (produtividade = `SUM(q)/NULLIF(SUM(area),0)`), testados contra os valores auditados do DAX (PB 2023: 64,69 t/ha; -16,96%; +3,41%; 0,90%; share açúcar 27,54%).
-- Observação verificada nos parquet: as colunas de **desvio e participação não estão** nos fatos por nível (só produtividade, tendência, oscilação, `p_chow`, etc.), então o app precisa calculá-las (Task 5). A coluna `tendencia_t_ha` é uma média móvel centrada de 3 anos (nível suavizado, vazia em 2003 e 2023), não uma taxa; a inclinação em t/ha/ano com erro-padrão e intervalo ainda não existe na gold e entra na Task 5, para sustentar a R07 (Task 10).
+- Observação verificada nos parquet: as colunas de **desvio e participação não estão** nos fatos por nível (só produtividade, tendência, oscilação, `p_chow`, etc.), então o app precisa calculá-las (Task 5). Contrato completo em [contrato-dados.md](contrato-dados.md). A coluna `nivel_suavizado_t_ha` (antes `tendencia_t_ha`) é uma média móvel centrada de 3 anos (nível suavizado, vazia em 2003 e 2023), não uma taxa; a inclinação em t/ha/ano com erro-padrão e intervalo ainda não existe na gold e entra na Task 5, para sustentar a R07 (Task 10).
 
 ### 7.4 Dados internacionais (camada de serviço)
 
@@ -367,7 +367,7 @@ Quatro marcos. Sem o prazo real, estão em ordem e horas. O backlog tem **20 iss
 | R8 | Persona indisponível para o teste | Rubrica (0,5) e critérios de sucesso | Agendar em M4; reserva de 2 usuários próximos da persona, declarando a limitação |
 | R9 | HF Spaces dorme ou muda limites | Demo | Plano B local; ping antes; Render como segunda opção |
 | R10 | Microrregiões do IBGE descontinuadas na API de malhas | Mapa extra | Verificar em Task 14; fallback usar regiões imediatas via de-para de `dim_territorio` |
-| R11 | CONSECANA 1,0495 "a confirmar" | Share ATR | Task 5 confirma ou rotula como premissa em `/metodologia` |
+| R11 | CONSECANA 1,0495 "a confirmar" | Share ATR | Resolvido na Task 5: sem fonte pública primária, os fatores ficam rotulados como premissa em `/metodologia` (ver [contrato-dados.md](contrato-dados.md), seção 7) |
 | R12 | Escopo infla | Atraso | Marcos com corte: cortar Task 14/Task 14, Task 15 e Task 12 antes de tocar nos obrigatórios |
 | R13 | Tensão persona x mix (Etapa 1 descartou o enquadramento 2) | Coerência da narrativa | Narrativa: sinal de mercado como contexto; ação "levar ao comercial" |
 | R14 | Licença do CEPEA (não comercial) | Ética/atribuição | Fora do núcleo; só com atribuição |
