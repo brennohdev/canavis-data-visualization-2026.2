@@ -51,10 +51,10 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: situacao_area
 
-		column tendencia_t_ha
+		column nivel_suavizado_t_ha
 			dataType: double
 			summarizeBy: none
-			sourceColumn: tendencia_t_ha
+			sourceColumn: nivel_suavizado_t_ha
 
 		column oscilacao_t_ha
 			dataType: double
@@ -102,7 +102,7 @@ createOrReplace
 		measure 'Desvio vs grupo' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade] VAR Referencia = CALCULATE([Produtividade], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
-		measure 'Tendência histórica (t por ha)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[tendencia_t_ha]))
+		measure 'Nível suavizado (t por ha)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[nivel_suavizado_t_ha]))
 			formatString: 0.00
 
 		measure 'Oscilação histórica (t por ha)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao[oscilacao_t_ha]))
@@ -167,10 +167,10 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: situacao_area
 
-		column tendencia_t_ha
+		column nivel_suavizado_t_ha
 			dataType: double
 			summarizeBy: none
-			sourceColumn: tendencia_t_ha
+			sourceColumn: nivel_suavizado_t_ha
 
 		column oscilacao_t_ha
 			dataType: double
@@ -218,7 +218,7 @@ createOrReplace
 		measure 'Desvio vs grupo (UF)' = VAR Tier = SELECTEDVALUE(dim_territorio[tier]) VAR Atual = [Produtividade (UF)] VAR Referencia = CALCULATE([Produtividade (UF)], ALLSELECTED(dim_territorio), KEEPFILTERS(dim_territorio[tier] = Tier)) RETURN IF(NOT ISBLANK(Tier) && NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
-		measure 'Tendência histórica (t por ha) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_uf[tendencia_t_ha]))
+		measure 'Nível suavizado (t por ha) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_uf[nivel_suavizado_t_ha]))
 			formatString: 0.00
 
 		measure 'Oscilação histórica (t por ha) (UF)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_uf[oscilacao_t_ha]))
@@ -283,10 +283,10 @@ createOrReplace
 			summarizeBy: none
 			sourceColumn: situacao_area
 
-		column tendencia_t_ha
+		column nivel_suavizado_t_ha
 			dataType: double
 			summarizeBy: none
-			sourceColumn: tendencia_t_ha
+			sourceColumn: nivel_suavizado_t_ha
 
 		column oscilacao_t_ha
 			dataType: double
@@ -330,7 +330,7 @@ createOrReplace
 		measure 'Desvio vs seleção (microrregião)' = VAR Atual = [Produtividade (microrregião)] VAR Referencia = CALCULATE([Produtividade (microrregião)], ALLSELECTED(dim_territorio)) RETURN IF(NOT ISBLANK(Atual) && NOT ISBLANK(Referencia), DIVIDE(Atual - Referencia, Referencia))
 			formatString: 0.00%
 
-		measure 'Tendência histórica (t por ha) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_microrregiao[tendencia_t_ha]))
+		measure 'Nível suavizado (t por ha) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_microrregiao[nivel_suavizado_t_ha]))
 			formatString: 0.00
 
 		measure 'Oscilação histórica (t por ha) (microrregião)' = IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX(fato_producao_microrregiao[oscilacao_t_ha]))

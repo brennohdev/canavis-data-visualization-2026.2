@@ -1,0 +1,304 @@
+versao: 1
+
+parametros:
+  fator_atr_acucar:
+    valor: 1.0495
+    unidade: kg ATR por kg de açúcar
+    status: premissa
+    origem: >-
+      docs/entrega-etapa2/auditoria-medidas-dax.md, seção 6.2 (CONSECANA-SP e Piracicaba
+      Engenharia). Alternativa: açúcar VHP 1,0453, que muda o share em menos de 0,5 ponto
+      percentual. Sem fonte pública primária acessível para confirmar.
+  fator_atr_etanol_anidro:
+    valor: 1.7651
+    unidade: kg ATR por litro de etanol anidro
+    status: premissa
+    origem: >-
+      docs/entrega-etapa2/auditoria-medidas-dax.md, seção 6.2. Sem fonte pública primária
+      acessível para confirmar.
+  fator_atr_etanol_hidratado:
+    valor: 1.6913
+    unidade: kg ATR por litro de etanol hidratado
+    status: premissa
+    origem: >-
+      docs/entrega-etapa2/auditoria-medidas-dax.md, seção 6.2. Sem fonte pública primária
+      acessível para confirmar.
+
+indicadores:
+  - id: produtividade_ponderada
+    nome: Produtividade ponderada pela área
+    definicao: Rendimento médio da cana em um recorte, calculado como razão de agregados.
+    formula: soma(quantidade_produzida_t) / soma(area_colhida_ha)
+    unidade: t/ha
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao, municipio]
+    funcao: canavis.domain.indicators.produtividade_ponderada
+    tratamento_ausencia: >-
+      Qualquer parcela ausente devolve vazio. Área somada igual a zero devolve vazio. Zero
+      real entra na soma.
+    limitacoes:
+      - A média simples das produtividades dá outro valor e não deve ser usada.
+      - Em município, 62% das linhas não têm produção e há valores suprimidos por sigilo.
+    paridade:
+      pb_2023: 64.69
+      brasil_2023: 77.90
+
+  - id: participacao_regional
+    nome: Participação regional
+    definicao: Peso da quantidade produzida do território no total do mesmo nível.
+    formula: quantidade_territorio / quantidade_total_do_nivel * 100
+    unidade: "%"
+    sentido: neutro
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao, municipio]
+    funcao: canavis.domain.indicators.participacao
+    tratamento_ausencia: >-
+      Quantidade ou total ausente devolve vazio. Total igual a zero devolve vazio.
+    limitacoes:
+      - Só vale com o nível fixado. Não usar em ranking com níveis misturados.
+      - O total do nível precisa estar completo, sem município suprimido.
+    paridade:
+      pb_2023: 0.90
+
+  - id: participacao_municipio_area_pb
+    nome: Participação do município na área colhida da Paraíba
+    definicao: Fatia da área colhida do município na área colhida da UF.
+    formula: area_colhida_municipio_ha / area_colhida_uf_ha * 100
+    unidade: "%"
+    sentido: neutro
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [municipio]
+    funcao: canavis.domain.indicators.participacao
+    tratamento_ausencia: >-
+      Município suprimido devolve vazio, não zero. Município sem produção tem 0%.
+    limitacoes:
+      - Vale só para a Paraíba, única UF com base municipal.
+      - A soma dos 82 municípios com produção em 2023 dá 100% da área da UF.
+    paridade:
+      pb_2023_soma_pct: 100.0
+
+  - id: desvio_vs_selecao
+    nome: Desvio da produtividade contra a seleção
+    definicao: Distância percentual da produtividade do território frente à produtividade ponderada da seleção.
+    formula: (produtividade_territorio - produtividade_selecao) / produtividade_selecao * 100
+    unidade: "%"
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao, municipio]
+    funcao: canavis.domain.indicators.desvio_vs_selecao
+    tratamento_ausencia: >-
+      Território ou referência ausente devolve vazio. Referência igual a zero devolve vazio.
+    limitacoes:
+      - A referência é a seleção escolhida, não o Brasil nem uma média fixa.
+      - Mudar a seleção muda o desvio.
+    paridade:
+      pb_2023: -16.96
+
+  - id: desvio_vs_grupo
+    nome: Desvio da produtividade contra o grupo de escala
+    definicao: Distância percentual da produtividade da UF frente às UFs do mesmo tier, incluindo ela mesma.
+    formula: (produtividade_uf - produtividade_tier) / produtividade_tier * 100
+    unidade: "%"
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf]
+    funcao: canavis.domain.indicators.desvio_vs_grupo
+    tratamento_ausencia: >-
+      UF sem tier devolve vazio. Produtividade ausente devolve vazio.
+    limitacoes:
+      - Só nível UF. Microrregião e município não têm tier.
+      - A UF faz parte do próprio grupo, o que aproxima o desvio de zero em grupos pequenos.
+    paridade:
+      pb_2023: 3.41
+
+  - id: share_atr_acucar
+    nome: Participação do açúcar no ATR
+    definicao: Fatia do açúcar no ATR total equivalente de açúcar e etanol.
+    formula: atr_acucar / (atr_acucar + atr_etanol) * 100
+    unidade: "%"
+    sentido: neutro
+    fonte:
+      fonte_id: conab_cana
+      ultimo_ano: 2026
+    niveis: [uf]
+    funcao: canavis.domain.indicators.share_atr_acucar
+    tratamento_ausencia: >-
+      Qualquer insumo ausente devolve vazio. ATR total igual a zero devolve vazio, nunca 0%
+      nem 50/50. Açúcar zero com etanol positivo dá 0%.
+    limitacoes:
+      - Os fatores CONSECANA são premissa, não foram confirmados em fonte pública.
+      - Só nível UF.
+      - No último ano, a CONAB é previsão da safra, não realizado.
+      - Anidro e hidratado entram separados, nunca pelo total de etanol.
+    paridade:
+      pb_safra_2023_24: 27.54
+
+  - id: share_atr_etanol
+    nome: Participação do etanol no ATR
+    definicao: Fatia do etanol no ATR total equivalente de açúcar e etanol.
+    formula: atr_etanol / (atr_acucar + atr_etanol) * 100
+    unidade: "%"
+    sentido: neutro
+    fonte:
+      fonte_id: conab_cana
+      ultimo_ano: 2026
+    niveis: [uf]
+    funcao: canavis.domain.indicators.share_atr_etanol
+    tratamento_ausencia: >-
+      Qualquer insumo ausente devolve vazio. ATR total igual a zero devolve vazio.
+    limitacoes:
+      - Os fatores CONSECANA são premissa, não foram confirmados em fonte pública.
+      - Só nível UF.
+      - No último ano, a CONAB é previsão da safra, não realizado.
+    paridade:
+      pb_safra_2023_24: 72.46
+
+  - id: nivel_suavizado
+    nome: Nível suavizado da produtividade
+    definicao: Média móvel centrada de 3 anos da produtividade.
+    formula: media(produtividade[t-1], produtividade[t], produtividade[t+1])
+    unidade: t/ha
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.features.decompor_serie_anual
+    tratamento_ausencia: >-
+      Vazio nas bordas (2003 e 2023) e em lacunas. Não interpola.
+    limitacoes:
+      - É um nível, não uma taxa de variação.
+      - Vazio no primeiro e no último ano da série.
+      - Não existe para município.
+
+  - id: oscilacao
+    nome: Oscilação da produtividade
+    definicao: Diferença entre a produtividade observada e o nível suavizado.
+    formula: produtividade - nivel_suavizado
+    unidade: t/ha
+    sentido: neutro
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.features.decompor_serie_anual
+    tratamento_ausencia: Vazia onde o nível suavizado é vazio.
+    limitacoes:
+      - Depende da janela de 3 anos do nível suavizado.
+      - Vazia em 2003 e 2023.
+
+  - id: tendencia_inclinacao_5a
+    nome: Tendência da produtividade em 5 anos
+    definicao: Inclinação de mínimos quadrados da produtividade nos últimos 5 anos, com IC 95%.
+    formula: OLS de produtividade sobre ano; sobe ou cai só se o IC 95% exclui zero
+    unidade: t/ha/ano
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.tendencia.tendencia_janela
+    tratamento_ausencia: >-
+      Anos não consecutivos ou valor ausente dão status serie_incompleta, sem interpolar.
+      Menos de 4 pontos dão serie_curta.
+    limitacoes:
+      - IC e erro-padrão são nominais, de OLS com erros iid.
+      - Janela curta tem IC largo. Com 5 anos o IC da PB contém zero.
+      - O último ano pesa muito na inclinação.
+    paridade:
+      pb_inclinacao: 1.808
+      pb_ic95: [-1.29, 4.91]
+
+  - id: tendencia_inclinacao_10a
+    nome: Tendência da produtividade em 10 anos
+    definicao: Inclinação de mínimos quadrados da produtividade nos últimos 10 anos, com IC 95%.
+    formula: OLS de produtividade sobre ano; sobe ou cai só se o IC 95% exclui zero
+    unidade: t/ha/ano
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.tendencia.tendencia_janela
+    tratamento_ausencia: >-
+      Anos não consecutivos ou valor ausente dão status serie_incompleta, sem interpolar.
+    limitacoes:
+      - IC e erro-padrão são nominais, de OLS com erros iid.
+      - O último ano pesa na inclinação.
+    paridade:
+      pb_inclinacao: 0.490
+      pb_ic95: [-0.24, 1.22]
+
+  - id: tendencia_inclinacao_21a
+    nome: Tendência da produtividade em 21 anos
+    definicao: Inclinação de mínimos quadrados da produtividade na série completa de 2003 a 2023, com IC 95%.
+    formula: OLS de produtividade sobre ano; sobe ou cai só se o IC 95% exclui zero
+    unidade: t/ha/ano
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.tendencia.tendencia_janela
+    tratamento_ausencia: >-
+      Anos não consecutivos ou valor ausente dão status serie_incompleta, sem interpolar.
+    limitacoes:
+      - IC e erro-padrão são nominais, de OLS com erros iid.
+      - Mistura regimes diferentes e ignora quebra estrutural.
+    paridade:
+      pb_inclinacao: 0.396
+      pb_ic95: [0.13, 0.66]
+
+  - id: tendencia_inclinacao_sem_ultimo_ano
+    nome: Tendência da produtividade sem o último ano
+    definicao: Mesma inclinação das janelas de 5 e 10 anos, descartando o último ano da série.
+    formula: OLS sobre a janela terminando no penúltimo ano
+    unidade: t/ha/ano
+    sentido: maior_melhor
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao]
+    funcao: canavis.domain.tendencia.tendencia_janela
+    tratamento_ausencia: >-
+      Anos não consecutivos ou valor ausente dão status serie_incompleta, sem interpolar.
+    limitacoes:
+      - IC e erro-padrão são nominais, de OLS com erros iid.
+      - Serve para medir a sensibilidade da inclinação ao último ano.
+    paridade:
+      pb_inclinacao_5a: 0.555
+      pb_inclinacao_10a: 0.302
+
+  - id: situacao_cobertura
+    nome: Situação de cobertura do dado
+    definicao: Classifica cada fonte, território e ano em presente, sem_producao, suprimido ou sem_registro.
+    formula: classificar_situacao(quantidade, situacao_quantidade)
+    unidade: categoria
+    sentido: neutro
+    fonte:
+      fonte_id: ibge_pam_1612
+      ultimo_ano: 2023
+    niveis: [uf, microrregiao, municipio]
+    funcao: canavis.domain.cobertura.classificar_situacao
+    tratamento_ausencia: >-
+      sem_producao é zero real registrado pela fonte. suprimido é valor omitido por sigilo.
+      sem_registro é combinação sem linha na fonte. Nenhuma das duas últimas vira zero.
+    limitacoes:
+      - Quantidade ausente com situação presente é inconsistente e gera erro.
+      - Na PB em 2023, são 82 municípios com produção, 140 com zero registrado e 1 suprimido.
+    paridade:
+      pb_2023:
+        presente: 82
+        sem_producao: 140
+        suprimido: 1

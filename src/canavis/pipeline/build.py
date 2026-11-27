@@ -23,7 +23,7 @@ _REFERENCIA = Path(__file__).resolve().parents[3] / "data/reference/municipios_p
 # Colunas de análise histórica que só fazem sentido em micro/UF (ver temporal.py).
 # O município não recebe série temporal, então sua versão por nível as descarta.
 _COLUNAS_TEMPORAIS = [
-    "tendencia_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
+    "nivel_suavizado_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
     "status_chow", "ponto_candidato_quebra", "quebra_confirmada",
 ]
 

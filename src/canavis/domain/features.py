@@ -11,7 +11,7 @@ def decompor_serie_anual(periodos: pd.Series, valores: pd.Series) -> pd.DataFram
         raise ValueError("Anos devem ser únicos e não ausentes")
     consecutivo = dados["ano"].diff().eq(1) & dados["ano"].diff(-1).eq(-1)
     tendencia = dados["valor"].rolling(3, center=True, min_periods=3).mean().where(consecutivo)
-    return pd.DataFrame({"tendencia_t_ha": tendencia,
+    return pd.DataFrame({"nivel_suavizado_t_ha": tendencia,
                          "oscilacao_t_ha": dados["valor"] - tendencia}).reindex(periodos.index)
 
 

@@ -192,9 +192,9 @@ Reproduzível com `python scripts/analise_tendencia_base_municipal.py`.
 
 ### 7.1 Passo 3: o que a tendência sustenta
 
-A coluna `tendencia_t_ha` da gold é uma média móvel centrada de 3 anos. Ela é um nível suavizado,
+A coluna `nivel_suavizado_t_ha` da gold é uma média móvel centrada de 3 anos. Ela é um nível suavizado,
 não uma taxa, e fica vazia em 2003 e 2023. A inclinação em t/ha/ano (função `tendencia_anual`)
-não está na gold e não traz erro-padrão. Para a PB:
+não está na gold e não traz erro-padrão. A coluna se chamava `tendencia_t_ha` e foi renomeada para `nivel_suavizado_t_ha` na Task 5, para não sugerir uma taxa. A inclinação com IC 95% agora é calculada em `canavis.domain.tendencia`. Para a PB:
 
 | Janela | Mínimos quadrados (t/ha/ano) | IC 95% | Theil-Sen | Sem 2023 (mín. quadrados) |
 |---|---|---|---|---|

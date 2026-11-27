@@ -10,8 +10,8 @@ def test_media_movel_recupera_tendencia_linear():
     anos = pd.Series(range(2003, 2024))
     valores = 2.0 * (anos - 2003) + 40
     resultado = decompor_serie_anual(anos, valores)
-    assert resultado.tendencia_t_ha.iloc[1:-1].to_numpy() == pytest.approx(valores.iloc[1:-1])
-    assert resultado.tendencia_t_ha.iloc[[0, -1]].isna().all()
+    assert resultado.nivel_suavizado_t_ha.iloc[1:-1].to_numpy() == pytest.approx(valores.iloc[1:-1])
+    assert resultado.nivel_suavizado_t_ha.iloc[[0, -1]].isna().all()
 
 
 def test_quebra_injetada_detectada_sem_falso_positivo_no_controle():
@@ -27,7 +27,7 @@ def test_lacunas_nao_interpoladas_e_teste_indisponivel():
     anos = pd.Series(range(2003, 2024))
     valores = pd.Series(np.arange(21, dtype=float))
     valores.iloc[10] = np.nan
-    assert decompor_serie_anual(anos, valores).tendencia_t_ha.iloc[9:12].isna().all()
+    assert decompor_serie_anual(anos, valores).nivel_suavizado_t_ha.iloc[9:12].isna().all()
     assert np.isnan(chow(anos, valores)["p_chow"])
     assert np.isnan(chow(anos, 2.0 * anos)["p_chow"])
 
@@ -41,4 +41,4 @@ def test_materializacao_preserva_municipios_e_nao_confirma_quebra():
     assert len(resultado) == len(fato)
     assert resultado.quebra_confirmada.isna().all()
     assert resultado.ponto_candidato_quebra.sum() == 1
-    assert pd.isna(resultado.iloc[-1].tendencia_t_ha)
+    assert pd.isna(resultado.iloc[-1].nivel_suavizado_t_ha)

@@ -62,7 +62,7 @@ def medidas_adicionais(nome):
     # Município não entra — não tem colunas temporais (62% de supressão).
     if nome in ("fato_producao", "fato_producao_uf", "fato_producao_microrregiao"):
         sufixo = _SUFIXO_NIVEL[nome]
-        return [(f"Tendência histórica (t por ha){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX({nome}[tendencia_t_ha]))", "0.00", None),
+        return [(f"Nível suavizado (t por ha){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX({nome}[nivel_suavizado_t_ha]))", "0.00", None),
                 (f"Oscilação histórica (t por ha){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]) && HASONEVALUE(dim_calendario[ano]), MAX({nome}[oscilacao_t_ha]))", "0.00", None),
                 (f"P Chow exploratório (2003-2023){sufixo}", f"IF(HASONEVALUE(dim_territorio[territorio_id]), MAX({nome}[p_chow]))", "0.000000", None)]
     if nome == "fato_industria":
