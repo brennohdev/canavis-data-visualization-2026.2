@@ -1,0 +1,43 @@
+name: Atualizar dados internacionais
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: atualizar-dados
+  cancel-in-progress: false
+jobs:
+  atualizar:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.4.0
+        with:
+          version: "0.11.3"
+      - run: uv sync --frozen --extra api --extra dev
+      - run: .venv/bin/canavis-intl refresh
+      - id: mudanca
+        run: |
+          if [ -n "$(git status --porcelain -- data/external)" ]; then
+            echo "mudou=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "mudou=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.mudanca.outputs.mudou == 'true'
+        run: .venv/bin/pytest -q
+      - if: steps.mudanca.outputs.mudou == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/external
+          git commit -m "chore(dados): atualiza snapshots internacionais"
+          git push origin HEAD:main
+      - if: steps.mudanca.outputs.mudou == 'true'
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body --silent --show-error --max-time 30 "$RENDER_DEPLOY_HOOK_URL"
