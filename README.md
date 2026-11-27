@@ -104,5 +104,5 @@ so the submission lands at least 72 h early for the early-delivery bonus).
 
 The React + FastAPI application lives in `apps/`. One command runs it: `docker compose up --build`,
 then open <http://localhost:7860/uf/PB?ano=2021>. Instructions (in Portuguese), environment
-variables, deployment to Hugging Face Spaces and the clean-machine checklist are in
+variables, deployment to Render (live at <https://canavis.onrender.com>) and the clean-machine checklist are in
 [docs/entrega-etapa3/como-executar.md](docs/entrega-etapa3/como-executar.md).
