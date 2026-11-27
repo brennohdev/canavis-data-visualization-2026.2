@@ -21,7 +21,7 @@ revista nas Etapas 2 ou 3, o motivo original estará documentado.
 | [0013](0013-stack-etapa3.md) | Stack da Etapa 3: React + TypeScript, FastAPI, DuckDB, contêiner único | Aceita |
 | [0014](0014-url-fonte-de-verdade-e-rotas.md) | URL como fonte de verdade e rotas | Aceita |
 | [0015](0015-engine-de-regras-em-python.md) | Engine de regras de texto em Python e vocabulário calibrado | Proposta |
-| [0016](0016-ingestao-internacional-snapshot-first.md) | Ingestão internacional snapshot-first | Proposta |
+| [0016](0016-ingestao-internacional-snapshot-first.md) | Ingestão internacional snapshot-first | Aceita |
 | [0017](0017-graficos-e-ui.md) | Bibliotecas de gráficos e UI (Plot/D3, Tailwind/shadcn) | Proposta |
 | [0018](0018-deploy-e-reprodutibilidade.md) | Deploy e reprodutibilidade | Proposta |
 | [0019](0019-modelagem-estatistica-e-limites.md) | Modelagem estatística e seus limites | Proposta |

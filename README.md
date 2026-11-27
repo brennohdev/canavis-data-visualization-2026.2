@@ -106,3 +106,18 @@ The React + FastAPI application lives in `apps/`. One command runs it: `docker c
 then open <http://localhost:7860/uf/PB?ano=2021>. Instructions (in Portuguese), environment
 variables, deployment to Render (live at <https://canavis.onrender.com>) and the clean-machine checklist are in
 [docs/entrega-etapa3/como-executar.md](docs/entrega-etapa3/como-executar.md).
+
+## International market data (Stage 3, Task 7)
+
+Price, exchange rate, COT and country balance snapshots live in `data/external/` (Parquet plus
+`manifest.json`) and are served by `/api/v1/mercado/{cambio,acucar,paises,cot}`. The API only reads
+the snapshots. To refresh them (needs network, no API key):
+
+```bash
+uv run canavis-intl refresh                 # all sources
+uv run canavis-intl refresh --fonte fred    # a single source
+uv run canavis-intl reprocess               # rebuild snapshots from the saved raw files
+```
+
+Design, sources, risks and the deferred live mode are in
+[ADR 0016](docs/decisoes/0016-ingestao-internacional-snapshot-first.md) (Portuguese).
