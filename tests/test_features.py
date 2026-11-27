@@ -41,8 +41,8 @@ def test_decompor_recupera_tendencia_linear():
     anos = pd.Series(range(2003, 2024))
     valores = 2.0 * (anos - 2003) + 40
     resultado = features.decompor_serie_anual(anos, valores)
-    assert resultado.tendencia_t_ha.iloc[1:-1].to_numpy() == pytest.approx(valores.iloc[1:-1])
-    assert resultado.tendencia_t_ha.iloc[[0, -1]].isna().all()
+    assert resultado.nivel_suavizado_t_ha.iloc[1:-1].to_numpy() == pytest.approx(valores.iloc[1:-1])
+    assert resultado.nivel_suavizado_t_ha.iloc[[0, -1]].isna().all()
 
 
 def test_varredura_supf_detecta_quebra_injetada():

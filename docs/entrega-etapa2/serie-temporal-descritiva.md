@@ -12,7 +12,7 @@
 
 **Estado na Etapa 2:** a camada analítica está completa — decomposição tendência/oscilação, teste
 de quebra e diagnóstico econométrico (notebook 04), com os resultados materializados na gold
-(`tendencia_t_ha`, `oscilacao_t_ha`, `p_chow`, `ponto_candidato_quebra`, `quebra_confirmada`). No
+(`nivel_suavizado_t_ha`, `oscilacao_t_ha`, `p_chow`, `ponto_candidato_quebra`, `quebra_confirmada`; a primeira se chamava `tendencia_t_ha` e foi renomeada na Task 5 da Etapa 3, pois é um nível suavizado e não uma taxa). No
 painel, porém, a tela de série temporal exibe **apenas a linha de produtividade observada**.
 
 **Por que a decomposição (tendência + banda de incerteza + marcador de quebra) NÃO foi para a tela
@@ -56,7 +56,7 @@ Todo o necessário já está materializado em `powerbi/modelo.tmdl` (Task 10, AD
 | Coluna / medida existente | Uso na tela |
 |---------------------------|-------------|
 | medida `Produtividade` | linha do **observado** |
-| medida `Tendência histórica (t por ha)` (`MAX(tendencia_t_ha)`) | linha suave de **tendência** (média móvel de 3 anos) |
+| medida `Nível suavizado (t por ha)` (`MAX(nivel_suavizado_t_ha)`) | linha suave de **tendência** (média móvel de 3 anos) |
 | medida `Oscilação histórica (t por ha)` (`MAX(oscilacao_t_ha)`) | base da **banda de incerteza** (observado − tendência) |
 | coluna `ponto_candidato_quebra` (True em 2013) | marcador vertical de **"divisão exploratória"** |
 | coluna `quebra_confirmada` (sempre nula) | **não** vira visual; alimenta o tooltip de ressalva |
@@ -73,7 +73,7 @@ Um gráfico de linha único, **um território por vez** (as medidas já têm `HA
 
 - Eixo X: ano (2003–2023).
 - Linha cheia: `Produtividade` (observado).
-- Linha suave sobreposta: `Tendência histórica (t por ha)`.
+- Linha suave sobreposta: `Nível suavizado (t por ha)`.
 
 É o coração da entrega e atende diretamente ao objetivo da Task 10: a **tendência** é a linha suave; a
 **oscilação** é a distância entre as duas linhas. Mantenha as lacunas visíveis (anos sem dado ficam
@@ -136,10 +136,10 @@ número de destaque da tela.
 ## Passo a passo no Power BI
 
 1. Na tela de Detalhe do Estado/Município, inserir um visual de **linha**. Eixo X = `dim_calendario[ano]`.
-2. Adicionar as medidas `Produtividade` e `Tendência histórica (t por ha)` nos valores (duas linhas).
+2. Adicionar as medidas `Produtividade` e `Nível suavizado (t por ha)` nos valores (duas linhas).
 3. Garantir que a tela tenha **um território no contexto** (slicer de território ou drill-through), para
    `HASONEVALUE` resolver — sem isso as medidas de tendência/oscilação ficam em branco de propósito.
-4. Banda de incerteza: criar duas medidas auxiliares (limite superior = `[Tendência histórica (t por ha)] +`
+4. Banda de incerteza: criar duas medidas auxiliares (limite superior = `[Nível suavizado (t por ha)] +`
    `ABS([Oscilação histórica (t por ha)])`; inferior = a mesma com `−`) e usar um visual que suporte área
    sombreada entre linhas, ou o recurso de **faixa de erro** / análise do visual de linha.
 5. Linha de referência vertical em 2013 (via analítica do visual ou medida que marque

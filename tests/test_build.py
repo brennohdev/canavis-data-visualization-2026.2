@@ -132,7 +132,7 @@ def test_tier_preserva_integridade_referencial_da_estrela():
 
 
 _COLUNAS_TEMPORAIS = [
-    "tendencia_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
+    "nivel_suavizado_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
     "status_chow", "ponto_candidato_quebra", "quebra_confirmada",
 ]
 

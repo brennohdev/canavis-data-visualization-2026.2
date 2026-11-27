@@ -26,5 +26,5 @@ ROW(
     "Territorios", COUNTROWS(dim_territorio),
     "Dias", COUNTROWS(dim_calendario),
     "Fontes", COUNTROWS(dim_fonte),
-    "Tendencias", COUNT(fato_producao[tendencia_t_ha])
+    "Tendencias", COUNT(fato_producao[nivel_suavizado_t_ha])
 )

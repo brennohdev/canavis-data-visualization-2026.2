@@ -80,8 +80,8 @@ def test_medidas_cabiveis_por_granularidade(modelo):
     assert "measure 'Desvio vs grupo (microrregião)'" not in modelo
     assert "measure 'Desvio vs grupo (município)'" not in modelo
     # Série temporal: UF e microrregião, nunca município (sem colunas temporais).
-    assert "measure 'Tendência histórica (t por ha) (microrregião)'" in modelo
-    assert "measure 'Tendência histórica (t por ha) (município)'" not in modelo
+    assert "measure 'Nível suavizado (t por ha) (microrregião)'" in modelo
+    assert "measure 'Nível suavizado (t por ha) (município)'" not in modelo
     assert "measure 'P Chow exploratório (2003-2023) (município)'" not in modelo
     # Produtividade existe nos três níveis, lendo o próprio fato.
     for sufixo, fato in [("(UF)", "fato_producao_uf"),
@@ -92,7 +92,7 @@ def test_medidas_cabiveis_por_granularidade(modelo):
 
 
 _COLUNAS_TEMPORAIS = [
-    "tendencia_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
+    "nivel_suavizado_t_ha", "oscilacao_t_ha", "f_chow", "p_chow",
     "status_chow", "ponto_candidato_quebra", "quebra_confirmada",
 ]
 
