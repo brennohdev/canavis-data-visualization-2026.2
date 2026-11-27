@@ -42,7 +42,8 @@ e confere as classes de token.
 Nada abaixo existe hoje. Cada item nasce junto com a tela que o usa.
 | Componente | Issue |
 |---|---|
-| Gráficos (Observable Plot), coroplético, slope, múltiplos pequenos e tabela equivalente | #38 |
+| Componentes base de gráfico (Observable Plot: barras divergentes, série, ranking) e tabela equivalente | #33 |
+| Coroplético, slope e múltiplos pequenos, sobre os componentes base | #38 |
 | Filtros e controles ligados à URL | #32 |
 | Painel de leitura completo (descrever, destacar, sugerir) e selo de cenário | #35 |
 | Estados vazio, esqueleto e botão após 8 s | #37 |

@@ -74,5 +74,5 @@ absolutos ficam no Dockerfile.
   export do OpenAPI, endpoint de anos disponíveis, views somente leitura; #31
   `src/canavis/sources/intl` e um repositório novo em `repositorios/` lendo `data/external`;
   #34 `src/canavis/domain/regras` chamada por um caso de uso de insights.
-- O Dockerfile e o `.env.example` ainda definem `CANAVIS_PORT` e `CANAVIS_LOG_LEVEL`, que a
-  API ignora.
+- `CANAVIS_PORT` e `CANAVIS_LOG_LEVEL`, que a API ignora, foram retiradas do `Dockerfile` e do
+  `.env.example` na revisão do ADR 0018.

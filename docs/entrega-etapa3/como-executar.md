@@ -35,8 +35,8 @@ Copie `.env.example` para `.env` (ignorado pelo git) se quiser alterar algo.
 |---|---|---|
 | `CANAVIS_DATA_DIR` | `data/processed` (`/app/data/processed` na imagem) | Pasta dos parquet da gold |
 | `CANAVIS_STATIC_DIR` | `apps/web/dist` (`/app/static` na imagem) | Build do React servido pela API |
-| `CANAVIS_PORT` | `7860` (usa `PORT` se existir, como no Render) | Porta HTTP |
-| `CANAVIS_LOG_LEVEL` | `info` | Nível de log |
+
+A porta é fixa em 7860, no comando do uvicorn no `Dockerfile`; a API não lê variável de porta.
 
 ## Rotas da API
 
@@ -57,29 +57,29 @@ make build   # build do web
 O `ruff check` usa regras mínimas (erros e pyflakes) e ignora `notebooks/`, para não reescrever
 o código legado do pipeline. O `ruff format --check` vale só para `apps/`.
 
-## Publicação no Hugging Face Spaces
+## Publicação no Render
 
-O workflow `.github/workflows/deploy-space.yml` envia o repositório ao Space, trocando o
-`README.md` pelo de `deploy/hf-space/README.md` (que tem o front-matter `sdk: docker`,
-`app_port: 7860`). Passos manuais, uma única vez:
+App publicado: <https://canavis.onrender.com/uf/PB?ano=2021>. Um único Web Service roda o contêiner
+inteiro (API e front). Cada push na `main` gera um deploy novo.
 
-1. Em <https://huggingface.co/new-space>, crie um Space com SDK **Docker** (vazio).
-2. Em <https://huggingface.co/settings/tokens>, gere um token com permissão de escrita.
-3. No GitHub, em Settings > Secrets and variables > Actions: segredo `HF_TOKEN` (o token) e
-   variável `HF_SPACE` (`usuario/nome-do-space`).
-4. Em Actions, rode o workflow **Deploy no Hugging Face Space**.
-5. Aguarde o build do Space e abra `https://huggingface.co/spaces/<usuario>/<nome>`, depois a
-   rota `/uf/PB?ano=2021` (ou o domínio `*.hf.space` do Space).
+Configuração do serviço (Settings, seção Build & Deploy), para recriar do zero:
 
-Spaces gratuitos dormem após inatividade (pendência P3 do ADR 0018): abra a URL uns 10 minutos
-antes da demonstração.
+| Campo | Valor |
+|---|---|
+| Language | Docker |
+| Branch | `main` |
+| Root Directory | em branco |
+| Dockerfile Path | `./Dockerfile` |
+| Docker Build Context Directory | `.` (a pasta raiz; com `./Dockerfile` aqui o build falha com "not a directory") |
+| Instance Type | Free |
+| Health Check Path | `/api/v1/saude` |
+| Variável de ambiente | `PORT=7860`, para o Render procurar a porta certa (o padrão dele é 10000) |
 
-## Plano B: Render
+Limites do plano Free: o serviço dorme após 15 minutos sem acesso e leva cerca de 1 minuto para
+acordar; a instância tem 0,1 CPU e 512 MB. Abra a URL alguns minutos antes da demonstração.
 
-Web Service com ambiente Docker apontando para este repositório (usa o `Dockerfile`). O Render
-define `PORT`, que a API aceita como fallback de `CANAVIS_PORT`. Como o `CMD` da imagem fixa a
-porta 7860, defina `CANAVIS_PORT`/`PORT` e o comando de início no painel só se o Render não
-detectar a porta aberta (7860 é detectada automaticamente na maioria dos casos).
+O Hugging Face Spaces foi descartado: Spaces com SDK Docker exigem plano PRO em contas pessoais
+(ADR 0018).
 
 ## Roteiro de verificação em máquina limpa (PENDENTE: manual do time)
 
@@ -91,7 +91,7 @@ Critério da issue #28: testar em máquina sem o ambiente do desenvolvedor, só 
 4. `curl -fsS 'localhost:7860/api/v1/uf/PB/producao?ano=2021'` deve devolver `produtividade_t_ha` 55,65… e
    `quantidade_produzida_t` 5630113.0.
 5. Abrir <http://localhost:7860/uf/PB?ano=2021> no navegador: KPI "55,7 t/ha" e o texto dinâmico.
-6. Repetir a URL do Space em aba anônima.
+6. Abrir <https://canavis.onrender.com/uf/PB?ano=2021> em aba anônima e conferir a mesma tela.
 
 ## Pontos em aberto
 
