@@ -11,3 +11,14 @@ class ProducaoNaoEncontrada(ErroDeDominio):
 
 class DadosIndisponiveis(ErroDeDominio):
     pass
+
+
+class MercadoIndisponivel(ErroDeDominio):
+    pass
+
+
+class ParametroMercadoInvalido(ErroDeDominio):
+    def __init__(self, parametro: str, valor: str) -> None:
+        super().__init__(parametro, valor)
+        self.parametro = parametro
+        self.valor = valor
