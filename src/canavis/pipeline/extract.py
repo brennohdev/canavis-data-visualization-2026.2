@@ -6,6 +6,7 @@ from canavis import storage
 from canavis.config import load_settings
 from canavis.logging import get_logger
 from canavis.sources import available_sources, build_source
+from canavis.sources.registry import intl_sources
 
 _log = get_logger(__name__)
 
@@ -15,7 +16,7 @@ def extract_all() -> dict[str, Path]:
     settings = load_settings()
 
     written: dict[str, Path] = {}
-    for key in available_sources():
+    for key in [k for k in available_sources() if k not in intl_sources()]:
         source = build_source(key)
         frame = source.fetch()
         destination = storage.write(frame, settings.paths.raw, key)

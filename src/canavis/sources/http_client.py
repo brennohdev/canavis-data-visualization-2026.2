@@ -14,12 +14,17 @@ class HttpClient:
         self._session = requests.Session()
         self._session.headers.update({"User-Agent": settings.http.user_agent})
 
-    def get_json(self, url: str) -> object:
-        response = self._session.get(url, timeout=self._timeout)
+    def get_json(self, url: str, headers: dict[str, str] | None = None) -> object:
+        response = self._session.get(url, timeout=self._timeout, headers=headers)
         response.raise_for_status()
         return response.json()
 
-    def get_text(self, url: str, encoding: str) -> str:
-        response = self._session.get(url, timeout=self._timeout)
+    def get_text(self, url: str, encoding: str, headers: dict[str, str] | None = None) -> str:
+        response = self._session.get(url, timeout=self._timeout, headers=headers)
         response.raise_for_status()
         return response.content.decode(encoding)
+
+    def get_bytes(self, url: str, headers: dict[str, str] | None = None) -> bytes:
+        response = self._session.get(url, timeout=self._timeout, headers=headers)
+        response.raise_for_status()
+        return response.content
