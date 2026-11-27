@@ -56,3 +56,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: docker build -t canavis:ci .
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [py, web, secrets, docker]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: render-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Disparar o deploy no Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body --silent --show-error --max-time 30 "$RENDER_DEPLOY_HOOK_URL"

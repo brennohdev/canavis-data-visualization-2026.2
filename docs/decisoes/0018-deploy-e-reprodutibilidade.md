@@ -53,6 +53,45 @@ DuckDB no navegador (perde a API própria e reescreve o ADR 0013) ou usar o Rend
 - O serviço dorme após 15 minutos sem acesso e leva cerca de 1 minuto para acordar. A
   mitigação da demo continua: abrir o link antes e ter o `docker compose up` local.
 - A instância tem 0,1 CPU e 512 MB de RAM. O consumo do app não foi medido.
-- Cada push na `main` gera um deploy, que consome minutos de build da cota mensal.
+- Cada deploy consome minutos de build da cota mensal. O deploy passou a ser controlado por workflow (seção seguinte).
 - O deploy deixa de ser um workflow do GitHub: `deploy-space.yml` e `deploy/hf-space/` saem do
   repositório. A pendência P3 com o professor passa a valer para o Render.
+
+## Decisões do deploy controlado (Task 7, #31)
+1. **Render sem deploy automático.** O serviço fica com Auto-Deploy em Off. Quem publica é um
+   workflow, por meio do Deploy Hook do Render, cuja URL é o segredo `RENDER_DEPLOY_HOOK_URL`
+   do GitHub.
+2. **Dois gatilhos.** (a) Job `deploy` em `ci.yml`, em push na `main`, com `needs` em
+   `py`, `web`, `secrets` e `docker`. (b) Passo final de `atualizar-dados.yml`, quando houve
+   commit de dados. Não há deploy duplicado: o push feito com o `GITHUB_TOKEN` não dispara o CI
+   (regra do GitHub Actions), então o commit do bot só gera o deploy do próprio workflow diário.
+   O grupo `concurrency: render-deploy` serializa os deploys do CI.
+3. **Atualização diária.** `atualizar-dados.yml` roda `canavis-intl refresh` às 06:17 UTC
+   (agendado e manual). O horário cai depois do fechamento do mercado de Nova York, o que evita
+   gravar o preço intradiário do Yahoo como se fosse fechamento.
+4. **Comparação de dados.** `coletado_em` e `defasagem_dias` mudam a cada coleta e entram em
+   `sha256`. Por isso o manifesto ganhou `sha256_dados`, que cobre as demais colunas
+   (`serie_id`, `data`, `valor`, `unidade`, `fonte_id`, `licenca`). O `refresh` só regrava o
+   parquet de uma fonte se `sha256_dados` mudou (ou se a fonte estava em falha, ou sem o campo).
+   Manifesto e `dim_fonte_intl.parquet` só são regravados quando alguma fonte mudou. Assim, sem
+   mudança, o diretório fica byte a byte igual e `git status --porcelain data/external` vem
+   vazio; o workflow então não faz commit nem deploy. Alternativas descartadas: comparar o
+   parquet (contém `coletado_em`, sempre difere) e comparar `sha256` do manifesto (idem).
+   Consequência: `coletado_em` de uma fonte sem mudança continua sendo o da última coleta que
+   alterou o dado. Uma falha isolada de fonte também não gera commit; fica no log do workflow e
+   entra no manifesto junto da próxima mudança de dados.
+5. **Commit do bot em `main`.** Exceção ao fluxo de PR aceita pelo mantenedor, só para
+   `data/external/`: o workflow faz `git add -- data/external` e nada mais. A `main` não tem
+   proteção de branch (`gh api .../branches/main/protection` respondeu 404 "Branch not
+   protected" e `/rulesets` respondeu `[]`, em 27/11/2026). Se a proteção for ativada, o push
+   do bot passa a falhar e será preciso liberar o bot ou voltar ao PR. Antes do commit o
+   workflow roda `pytest`; se falhar, não há commit nem deploy.
+6. **Permissões mínimas.** `contents: read` no topo dos dois workflows. `contents: write` só no
+   job `atualizar`. O job `deploy` do CI herda `read` e só usa o segredo.
+7. **Dockerfile.** A imagem ganhou `COPY data/external ./data/external`, `COPY config/sources.yaml`
+   e as variáveis `CANAVIS_EXTERNAL_DIR` e `CANAVIS_SOURCES_FILE`, esta usada pelo modo ao vivo.
+8. **Procedimento manual** no Render e no GitHub: `docs/entrega-etapa3/como-executar.md`,
+   seção "Deploy controlado no Render". O segredo `RENDER_DEPLOY_HOOK_URL` deve existir antes do
+   primeiro merge na `main`, senão o job `deploy` do CI falha.
+9. **Falha sem mudança de dado.** Uma fonte em `falha` sem mudança em nenhuma outra não é
+   persistida no manifesto; fica no log do workflow. Decisão aceita para evitar commit diário sem dado novo.

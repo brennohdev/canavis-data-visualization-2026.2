@@ -1,0 +1,1 @@
+{"chart": {"result": [{"meta": {"currency": "USX", "symbol": "SB=F", "gmtoffset": -18000, "timezone": "EST"}, "timestamp": [1795150800, 1795410000, 1795496400, 1795582800, 1795669200], "indicators": {"quote": [{"close": [17.030000686645508, 17.610000610351562, 17.65999984741211, 18.34000015258789, null]}]}}], "error": null}}

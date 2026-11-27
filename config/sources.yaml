@@ -46,3 +46,100 @@ anp_producao_etanol:
   url: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-producao-de-biocombustiveis/producao-etanol-anidro-hidratado-m3-2012-2026.csv"
   separator: ";"
   encoding: "utf-8-sig"
+bcb_sgs:
+  name: "Banco Central do Brasil — SGS série 1 (PTAX, dólar americano, venda)"
+  adapter: bcb_sgs
+  url: "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados"
+  serie_id: "cambio_usd_brl"
+  unit: "BRL/USD"
+  desde: "2000-01-01"
+  periodicity: "diaria"
+  license: "Dados abertos do Banco Central do Brasil; citar a fonte"
+  attribution: "Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS), série 1"
+  unofficial: false
+  ttl_hours: 6
+fred:
+  name: "FRED — Preço global do açúcar (PSUGAISAUSDM, origem FMI)"
+  adapter: fred
+  url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=PSUGAISAUSDM"
+  series_fred: "PSUGAISAUSDM"
+  headers:
+    User-Agent: "python-requests/2.34"
+  serie_id: "acucar_isa_fred"
+  unit: "USc/lb"
+  desde: "1990-01-01"
+  periodicity: "mensal"
+  license: "Dados públicos do FRED (Federal Reserve Bank of St. Louis); origem FMI; citar a fonte"
+  attribution: "International Monetary Fund, via FRED, Federal Reserve Bank of St. Louis (PSUGAISAUSDM)"
+  unofficial: false
+  ttl_hours: 24
+worldbank:
+  name: "Banco Mundial — Commodity Markets (Pink Sheet), preços mensais do açúcar"
+  adapter: worldbank
+  url: "https://www.worldbank.org/en/research/commodity-markets"
+  series_wb:
+    "Sugar, world": "acucar_mundo_wb"
+    "Sugar, EU": "acucar_ue_wb"
+    "Sugar, US": "acucar_eua_wb"
+  desde: "1990-01-01"
+  periodicity: "mensal"
+  license: "Creative Commons Attribution 4.0 (CC BY 4.0)"
+  attribution: "World Bank, Commodity Markets (Pink Sheet)"
+  unofficial: false
+  ttl_hours: 24
+yahoo:
+  name: "Yahoo Finance — Açúcar nº 11 (SB=F), fechamento diário"
+  adapter: yahoo
+  url: "https://query1.finance.yahoo.com/v8/finance/chart/SB=F?range=10y&interval=1d"
+  serie_id: "acucar_ny11_fechamento"
+  unit: "USc/lb"
+  periodicity: "diaria"
+  license: "Fonte não oficial; uso acadêmico, sem garantia; sujeito aos termos do Yahoo Finance"
+  attribution: "Yahoo Finance (SB=F, ICE Futures U.S.), dado não oficial"
+  unofficial: true
+  ttl_hours: 6
+cftc:
+  name: "CFTC — Commitments of Traders (desagregado, futuros), açúcar nº 11"
+  adapter: cftc
+  url: "https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm"
+  url_historico: "https://www.cftc.gov/files/dea/history/fut_disagg_txt_{ano}.zip"
+  url_semana: "https://www.cftc.gov/dea/newcot/f_disagg.txt"
+  codigo_contrato: "080732"
+  series_cot:
+    M_Money_Positions_Long_All: "cot_acucar_managed_money_long"
+    M_Money_Positions_Short_All: "cot_acucar_managed_money_short"
+    Prod_Merc_Positions_Long_All: "cot_acucar_produtores_long"
+    Prod_Merc_Positions_Short_All: "cot_acucar_produtores_short"
+    Open_Interest_All: "cot_acucar_open_interest"
+  unit: "contratos"
+  desde: "2015-01-01"
+  periodicity: "semanal"
+  license: "Domínio público (dados do governo dos EUA); citar a CFTC"
+  attribution: "U.S. Commodity Futures Trading Commission, Commitments of Traders"
+  unofficial: false
+  ttl_hours: 24
+usda_psd:
+  name: "USDA FAS — Production, Supply and Distribution (açúcar centrífugo)"
+  adapter: usda_psd
+  url: "https://apps.fas.usda.gov/psdonline/downloads/psd_alldata_csv.zip"
+  commodity: "Sugar, Centrifugal"
+  paises:
+    BR: "br"
+    IN: "in"
+    TH: "th"
+    CH: "cn"
+    E4: "ue"
+    US: "us"
+  atributos:
+    28: "producao"
+    88: "exportacoes"
+    57: "importacoes"
+    176: "estoque_final"
+    139: "consumo_humano"
+  unit: "mil t"
+  desde: "1990-01-01"
+  periodicity: "anual"
+  license: "Domínio público (dados do governo dos EUA); citar o USDA FAS"
+  attribution: "USDA Foreign Agricultural Service, Production, Supply and Distribution (PSD Online)"
+  unofficial: false
+  ttl_hours: 24

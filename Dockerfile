@@ -22,12 +22,16 @@ RUN uv sync --frozen --no-dev --no-editable --extra api
 # Parquet da gold versionados no repositório. Se faltarem, o build falha cedo.
 COPY data/processed ./data/processed
 RUN test -f data/processed/fato_producao_uf.parquet && test -f data/processed/dim_territorio.parquet
+COPY data/external ./data/external
+COPY config/sources.yaml ./config/sources.yaml
 
 COPY --from=web /app/apps/web/dist ./static
 
 ENV PATH="/app/.venv/bin:$PATH" \
     CANAVIS_STATIC_DIR=/app/static \
-    CANAVIS_DATA_DIR=/app/data/processed
+    CANAVIS_DATA_DIR=/app/data/processed \
+    CANAVIS_EXTERNAL_DIR=/app/data/external \
+    CANAVIS_SOURCES_FILE=/app/config/sources.yaml
 
 RUN useradd --create-home --uid 1000 app && chown -R app /app
 USER app

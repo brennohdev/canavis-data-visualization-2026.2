@@ -13,6 +13,8 @@ wheels/
 # Dados do pipeline: versionamos os parquet (compactos), ignoramos CSV volumoso
 data/**/*.csv
 !data/samples/*.csv
+# Brutos da ingestão internacional (reprocessáveis, não versionados)
+data/raw/intl/
 
 # Artefatos de compilação LaTeX
 *.aux
