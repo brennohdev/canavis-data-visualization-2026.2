@@ -2,18 +2,18 @@
   "fontes": {
     "bcb_sgs": {
       "arquivo": "bcb_sgs.parquet",
-      "coletado_em": "2026-11-27T13:03:29Z",
+      "coletado_em": "2026-11-28T15:36:03Z",
       "erro": null,
       "licenca": "Dados abertos do Banco Central do Brasil; citar a fonte",
-      "linhas": 6756,
-      "periodo_fim": "2026-11-26",
+      "linhas": 6757,
+      "periodo_fim": "2026-11-27",
       "periodo_ini": "2000-01-03",
-      "sha256": "d9fa0f0f7716cffe9eec019645fa9eeedd21182a5ccbc4d357e946e2b1630459",
-      "sha256_bruto": "0a0668c4156da963bc07ea90de623470f218f77c9ad3573f372b274fb4f28a92",
-      "sha256_dados": "a2186c1b08f8186bd671a9dfe762fe3ee2c2b2cc9ed8e79312d7c2a5d9a9529b",
+      "sha256": "e43644ed9724a63bbfc18452dcd2ab37e73089b89dd40f0e414fdca9317384f2",
+      "sha256_bruto": "c7a739e6e93a66bfbf0bd1be077ad69a2ad62667b6f87ac0425c03a0234406cf",
+      "sha256_dados": "a8fad953e781c8bd273ba5fb3331f47d31b8929d31107a33b1e46db9aece57af",
       "status": "ok",
       "url": "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados",
-      "versao_fonte": "2026-11-26"
+      "versao_fonte": "2026-11-27"
     },
     "cftc": {
       "arquivo": "cftc.parquet",
@@ -77,20 +77,20 @@
     },
     "yahoo": {
       "arquivo": "yahoo.parquet",
-      "coletado_em": "2026-11-27T13:04:36Z",
+      "coletado_em": "2026-11-28T15:36:04Z",
       "erro": null,
       "licenca": "Fonte não oficial; uso acadêmico, sem garantia; sujeito aos termos do Yahoo Finance",
       "linhas": 2516,
       "periodo_fim": "2026-11-27",
       "periodo_ini": "2016-11-28",
-      "sha256": "796d3ee95b6323dcee5423b458fa70b77e3120c61a855cd02bff983250a6a504",
-      "sha256_bruto": "d89660b9352073e091be308075a2375da44d5930056cee00a5fb115968b92100",
-      "sha256_dados": "e01568b9fb89816949941eca1c6e209547e537581b432b68d1c51c71cbe138c6",
+      "sha256": "43c732de44bb685e1a7e444416fa058a2e38bd4a3877954986087e4267a1c37b",
+      "sha256_bruto": "bfcccfaccb0cf0e31d16c1b0c8b4f35a965a7f9504472401e252dc0356942149",
+      "sha256_dados": "cf1e2941f001a2381885cd382f7a79b931cd39f36e74143747038d6a7215a619",
       "status": "ok",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/SB=F?range=10y&interval=1d",
       "versao_fonte": "2026-11-27"
     }
   },
-  "gerado_em": "2026-11-27T13:04:57Z",
+  "gerado_em": "2026-11-28T15:36:11Z",
   "versao_manifesto": 1
 }
